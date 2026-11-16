@@ -143,6 +143,9 @@ async function decryptPkg(pkg,key){
 
 /* ---------- الاتصال بالسيرفر ---------- */
 var SES=lsGet('trial-ses'),P=null,REF={subjects:[]},C={unread:0,pend:0,queue:[]},R={v:'login',f:{}},MODAL='',MODALF=null,MODALL='',BUSY=false,LOADERR='';
+function gsHas(g,sid){return (REF.gs||[]).some(function(x){return x.g==g&&x.s==sid})}
+function subsFor(g){return REF.subjects.filter(function(x){return gsHas(g,x.id)})}
+function subsAny(keep){return REF.subjects.filter(function(x){return (REF.gs||[]).some(function(y){return y.s==x.id})||(keep||[]).indexOf(x.id)>-1})}
 function sn(id){var s=REF.subjects.filter(function(x){return x.id==id})[0];return s?s.name:'—'}
 function emsg(e){var m=(e&&e.message)||'حدث خطأ';
   if(e&&e.net)return 'تعذّر الاتصال بالسيرفر. تأكد من النت وحاول مرة أخرى.';
@@ -399,7 +402,7 @@ function editHtml(){
   var e=R.ed,f=R.f,m=f.merr?'<div class="msg bad" role="alert">'+esc(f.merr)+'</div>':'',bt='<div class="row">'+btn('حفظ','saveEdit')+btn('إلغاء','closeModal','','sec')+'</div>';
   if(e.t==='c')return '<h2>تعديل الفصل</h2>'+fld('اسم الفصل','en')+(e.empty?sel('السنة الدراسية','eg',gOpts())+'<span class="hint">تغيير السنة متاح لفصل ليس فيه طلاب فقط.</span>':'')+m+bt;
   if(e.t==='s')return '<h2>تعديل بيانات الطالب</h2><div class="sub">الكود '+esc(e.code)+' (لا يتغير)</div>'+fld('الاسم','en')+sel('السنة الدراسية','eg',gOpts())+'<span class="hint">تغيير السنة يُشيل الطالب من فصله، ولا يُسمح به لطالب لديه تسليمات.</span>'+m+bt;
-  return '<h2>تعديل بيانات المدرس</h2><div class="sub">الكود '+esc(e.code)+' (لا يتغير)</div>'+fld('الاسم','en')+'<div><b>المواد</b>'+REF.subjects.map(function(x){return '<label class="chk"><input type="checkbox" data-chg="esub" data-id="'+x.id+'"'+((f.esubs||[]).indexOf(x.id)>-1?' checked':'')+'><span>'+esc(x.name)+'</span></label>'}).join('')+'</div>'+m+bt}
+  return '<h2>تعديل بيانات المدرس</h2><div class="sub">الكود '+esc(e.code)+' (لا يتغير)</div>'+fld('الاسم','en')+'<div><b>المواد</b>'+subsAny(f.esubs).map(function(x){return '<label class="chk"><input type="checkbox" data-chg="esub" data-id="'+x.id+'"'+((f.esubs||[]).indexOf(x.id)>-1?' checked':'')+'><span>'+esc(x.name)+'</span></label>'}).join('')+'</div>'+m+bt}
 function pwHtml(){
   var f=R.f,t=f.showpw?'text':'password',m=f.merr?'<div class="msg bad" role="alert">'+esc(f.merr)+'</div>':'';
   return '<h2>تغيير كلمة المرور</h2>'+fld('كلمة المرور الحالية','opw',{type:t,ac:'current-password',dir:'ltr'})+fld('كلمة المرور الجديدة','npw',{type:t,ac:'new-password',dir:'ltr',hint:'٦ أحرف على الأقل'})+fld('أعد كتابة الجديدة','npw2',{type:t,ac:'new-password',dir:'ltr'})+'<div class="row"><button type="button" class="lnk" data-act="togglePw">'+(f.showpw?'🙈 إخفاء':'👁 إظهار')+'</button></div>'+m+'<div class="row">'+btn(BUSY?'جارٍ الحفظ…':'حفظ كلمة المرور','doMyPw','','',BUSY)+btn('إلغاء','closeModal','','sec')+'</div>'}
@@ -485,7 +488,7 @@ function vAStu(){
   return '<h1>الطلاب</h1>'+okm()+err()+form+'<div class="card"><h3>كل الطلاب ('+n(a.students.length)+')</h3><div class="tbl"><table><thead><tr><th>م</th><th>الاسم</th><th>الكود</th><th>السنة</th><th>الفصل</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="6">لا يوجد طلاب بعد.</td></tr>')+'</tbody></table></div></div>'}
 function vATea(){
   var a=C.ad,f=R.f,subs=f.subs||[];
-  var form='<div class="card"><h3>إضافة مدرس</h3>'+fld('اسم المدرس','name')+'<div class="row" style="align-items:flex-end">'+fld('كلمة المرور (اتركها فاضية لتتولد تلقائياً)','tpw',{dir:'ltr'})+btn('اقترح كلمة','suggest',{k:'tpw'},'sec sm')+'</div>'+'<div><b>المواد التي يدرّسها</b>'+REF.subjects.map(function(s){return '<label class="chk"><input type="checkbox" data-chg="tsub" data-id="'+s.id+'"'+(subs.indexOf(s.id)>-1?' checked':'')+'><span>'+esc(s.name)+'</span></label>'}).join('')+'</div>'+btn(R.busy?'جارٍ الإنشاء…':'إنشاء الحساب','addTea','','',R.busy)+'</div>';
+  var form='<div class="card"><h3>إضافة مدرس</h3>'+fld('اسم المدرس','name')+'<div class="row" style="align-items:flex-end">'+fld('كلمة المرور (اتركها فاضية لتتولد تلقائياً)','tpw',{dir:'ltr'})+btn('اقترح كلمة','suggest',{k:'tpw'},'sec sm')+'</div>'+'<div><b>المواد التي يدرّسها</b>'+subsAny(subs).map(function(s){return '<label class="chk"><input type="checkbox" data-chg="tsub" data-id="'+s.id+'"'+(subs.indexOf(s.id)>-1?' checked':'')+'><span>'+esc(s.name)+'</span></label>'}).join('')+'</div>'+btn(R.busy?'جارٍ الإنشاء…':'إنشاء الحساب','addTea','','',R.busy)+'</div>';
   var rows=a.teachers.map(function(t,i){return '<tr><td>'+n(i+1)+'</td><td>'+esc(t.name)+'</td><td dir="ltr" style="text-align:right">'+esc(t.code)+'</td><td>'+(t.subjects.map(sn).map(esc).join('، ')||'—')+'</td><td>'+accActs(t)+'</td></tr>'}).join('');
   return '<h1>المدرسون</h1>'+okm()+err()+form+'<div class="card"><h3>كل المدرسين ('+n(a.teachers.length)+')</h3><div class="tbl"><table><thead><tr><th>م</th><th>الاسم</th><th>الكود</th><th>المواد</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="5">لا يوجد مدرسون بعد.</td></tr>')+'</tbody></table></div></div>'+archHtml()}
 function archHtml(){
@@ -496,7 +499,7 @@ function vACls(){
   var form='<div class="card"><h3>فصل جديد</h3><div class="row">'+fld('اسم الفصل','cname',{ph:'مثال: ١/ب'})+'<label class="fld"><span>السنة الدراسية</span><select data-bind="cg">'+gOpts().map(function(x){return '<option value="'+x[0]+'"'+(+f.cg===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label></div>'+btn('إنشاء الفصل','addCls')+'</div>';
   var subjT=REF.subjects.map(function(s){return {s:s,t:a.teachers.filter(function(t){return t.subjects.indexOf(s.id)>-1})}}).filter(function(x){return x.t.length});
   var cards=a.classes.map(function(c){
-    var tr=subjT.map(function(x){var cur=(c.teachers.filter(function(y){return y.subject_id===x.s.id})[0]||{}).teacher_id||'';
+    var tr=subjT.filter(function(x){return gsHas(c.grade_id,x.s.id)||c.teachers.some(function(y){return y.subject_id===x.s.id})}).map(function(x){var cur=(c.teachers.filter(function(y){return y.subject_id===x.s.id})[0]||{}).teacher_id||'';
       return '<label class="fld"><span>'+esc(x.s.name)+'</span><select data-chg="ct" data-c="'+c.id+'" data-s="'+x.s.id+'"><option value="">— بدون مدرس —</option>'+x.t.map(function(t){return '<option value="'+t.id+'"'+(cur===t.id?' selected':'')+'>'+esc(t.name)+'</option>'}).join('')+'</select></label>'}).join('');
     var h='<div class="card"><div class="row" style="justify-content:space-between"><div><h3>'+esc(c.name)+'</h3><span class="sub">'+GN[c.grade_id]+' · '+n(c.students.length)+' طالب</span></div>'+'<span class="row">'+btn('تعديل الفصل','editAcc',{id:c.id,t:'c'},'sec sm')+(R.ec===c.id?'':btn('تعديل الطلاب','editCls',{c:c.id},'sec sm'))+(R.dc===c.id?'':btn('حذف الفصل','delClsAsk',{c:c.id},'sec sm'))+'</span>'+'</div>'+(R.dc===c.id?'<div class="msg warn">سيُحذف الفصل ويرجع طلابه «بدون فصل»، وتظل درجاتهم القديمة. متأكد؟</div><div class="row">'+btn('نعم، احذف الفصل','delClsYes',{c:c.id},'sm')+btn('إلغاء','delClsNo','','sec sm')+'</div>':'')+'<div class="row">'+(tr||'<span class="sub">أضف مدرسين أولاً من تبويب «المدرسون» لتعيينهم.</span>')+'</div>';
     if(R.ec===c.id){var es=R.es||[],pool=a.students.filter(function(s){return s.grade_id===c.grade_id});
@@ -583,7 +586,7 @@ function readImg(file,cb){
     im.src=fr.result};
   fr.readAsDataURL(file)}
 function vMList(){
-  var f=R.f,list=C.mlist||[],sj=REF.subjects;
+  var f=R.f,list=C.mlist||[],sj=subsFor(+f.g||1);
   var head='<h1>التقييمات والأداءات</h1>'+okm()+err()+'<div class="card"><div class="row">'+sel('السنة الدراسية','g',gOpts(),1)+sel('المادة','s',sj.map(function(x){return [x.id,x.name]}),1)+'</div><div class="row">'+btn('+ إضافة جديد','mNew','','',!f.s)+'</div>'+'</div>';
   if(!f.s)return head+'<div class="msg warn">لا توجد مواد.</div>';
   return head+(list.length?list.map(function(a){
@@ -604,7 +607,7 @@ function vMEdit(){
   var dis=ro?' disabled':'';
   var wk=[];for(var w=1;w<=40;w++)wk.push(w);
   var top='<div class="row"><button type="button" class="lnk" data-act="mBack">← القائمة</button>'+btn('معاينة كطالب','mPv','','sec sm')+(m.id&&!m.dirty?btn('نسخ لأسبوع آخر','mCopy',{id:m.id},'sec sm'):'')+'</div><div><h1>'+(m.id?'تعديل':'إضافة')+' '+KN[m.meta.kind]+' · الأسبوع '+n(m.meta.week)+'</h1><span class="sub">'+(m.status==='draft'?'مسودة':(m.locked?'نزل ولا يمكن تعديله':'منشور ولم ينزل بعد (ما زال يمكن تعديله)'))+'</span></div>'+(m.restored?'<div class="msg warn">تم استرجاع تعديلات غير محفوظة من هذا الجهاز. '+btn('تجاهلها','mDiscard','','sec sm')+'</div>':'')+okm()+err();
-  var hd='<div class="card"><div class="row"><label class="fld"><span>السنة الدراسية</span><select data-mf="grade_id"'+dis+'>'+gOpts().map(function(x){return '<option value="'+x[0]+'"'+(+m.meta.grade_id===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label><label class="fld"><span>المادة</span><select data-mf="subject_id"'+dis+'>'+REF.subjects.map(function(x){return '<option value="'+x.id+'"'+(+m.meta.subject_id===x.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></label></div><div class="row"><label class="fld"><span>الأسبوع</span><select data-mf="week"'+dis+'>'+wk.map(function(x){return '<option value="'+x+'"'+(+m.meta.week===x?' selected':'')+'>الأسبوع '+n(x)+'</option>'}).join('')+'</select></label><div class="fld"><span>النوع</span><div class="tabs" role="group" aria-label="النوع">'+['A','C','H'].map(function(x){return '<button type="button" class="tab'+(m.meta.kind===x?' on':'')+'" data-act="mKind" data-k="'+x+'" aria-pressed="'+(m.meta.kind===x?'true':'false')+'"'+dis+'>'+KN[x]+'</button>'}).join('')+'</div></div><label class="fld"><span>موعد النزول</span><input type="datetime-local" data-mf="release_at" value="'+esc(m.meta.release_at)+'"'+dis+' dir="ltr"></label></div></div>';
+  var hd='<div class="card"><div class="row"><label class="fld"><span>السنة الدراسية</span><select data-mf="grade_id"'+dis+'>'+gOpts().map(function(x){return '<option value="'+x[0]+'"'+(+m.meta.grade_id===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label><label class="fld"><span>المادة</span><select data-mf="subject_id"'+dis+'>'+subsFor(m.meta.grade_id).concat(subsFor(m.meta.grade_id).some(function(y){return y.id===+m.meta.subject_id})?[]:REF.subjects.filter(function(y){return y.id===+m.meta.subject_id})).map(function(x){return '<option value="'+x.id+'"'+(+m.meta.subject_id===x.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></label></div><div class="row"><label class="fld"><span>الأسبوع</span><select data-mf="week"'+dis+'>'+wk.map(function(x){return '<option value="'+x+'"'+(+m.meta.week===x?' selected':'')+'>الأسبوع '+n(x)+'</option>'}).join('')+'</select></label><div class="fld"><span>النوع</span><div class="tabs" role="group" aria-label="النوع">'+['A','C','H'].map(function(x){return '<button type="button" class="tab'+(m.meta.kind===x?' on':'')+'" data-act="mKind" data-k="'+x+'" aria-pressed="'+(m.meta.kind===x?'true':'false')+'"'+dis+'>'+KN[x]+'</button>'}).join('')+'</div></div><label class="fld"><span>موعد النزول</span><input type="datetime-local" data-mf="release_at" value="'+esc(m.meta.release_at)+'"'+dis+' dir="ltr"></label></div></div>';
   var qs=m.qs.map(function(q,i){return mQHtml(q,i,ro)}).join('');
   var foot=ro?'':'<div class="row">'+btn('+ إضافة سؤال','mAddQ','','sec')+'</div><div class="card"><div class="row" style="justify-content:space-between"><b>'+n(m.qs.length)+' سؤال · '+fmtN(tot)+' درجة</b>'+(m.dirty?bdg('تعديلات غير محفوظة','warn'):'')+'</div>'+(R.mpub===1?'<div class="msg warn">هل أنت متأكد من نشر هذا؟</div><div class="row">'+btn('نعم، تابع','mPub',{s:2})+btn('لا','mPub',{s:0},'sec')+'</div>':(R.mpub===2?'<div class="msg bad">تأكيد أخير: بعد نزوله في الموعد لا يمكن تعديله ولا حذفه، ولا يمكن التراجع.</div><div class="row">'+btn(BUSY?'جارٍ النشر…':'نعم، انشر نهائياً','mPub',{s:3},'',BUSY)+btn('لا','mPub',{s:0},'sec')+'</div>':'<div class="row">'+btn(BUSY?'جارٍ الحفظ…':'حفظ المسودة','mSave','','',BUSY)+btn('نشر','mPub',{s:1},'sec')+'</div>'))+'<span class="hint">المنشور الذي لم يحن موعده يظل قابلاً للتعديل، والمسودة لا تظهر للمدارس.</span></div>';
   return top+hd+(qs||'<div class="msg">لا توجد أسئلة بعد. اضغط «إضافة سؤال».</div>')+foot}
@@ -661,7 +664,7 @@ var LOAD={
     ex={d:meta,off:Date.parse(dd.server_now)-Date.now(),ans:(dd.draft&&typeof dd.draft==='object')?dd.draft:{}};
     saveEx(ex);ex.d.questions=qs;rcClear('my_overview');C.ex=ex},
   notes:async function(){var r=await rpc('my_notifications');C.unread=0;C.notes=r.items.map(function(x){x.fresh=!x.read;return x});rpc('mark_notifications_read').catch(function(){})},
-  mList:async function(){var f=R.f;f.g=+f.g||1;var sj=REF.subjects;f.s=(sj.filter(function(x){return x.id==f.s})[0]||sj[0]||{}).id;C.mlist=f.s?await rpc('m_list',{p_grade:f.g,p_subject:+f.s}):[]},
+  mList:async function(){var f=R.f;f.g=+f.g||1;var sj=subsFor(f.g);f.s=(sj.filter(function(x){return x.id==f.s})[0]||sj[0]||{}).id;C.mlist=f.s?await rpc('m_list',{p_grade:f.g,p_subject:+f.s}):[]},
   mEdit:async function(){
     if(!R.mload&&C.me)return;R.mload=false;
     if(R.mid){var a=await rpc('m_get',{p_id:R.mid});
@@ -703,7 +706,7 @@ async function reload(){
 async function afterLogin(){
   P=await rpcC('my_profile',0,0);
   if(!P){throw new Error('الحساب غير مُعد في النظام. تواصل مع الإدارة.')}
-  try{REF=await rpcC('ref_data',0,24*60*MIN)}catch(e){}
+  try{REF=await rpcC('ref_data',0,30*MIN)}catch(e){}
   C.queue=lsGet('subq:'+P.id)||[];
   var rs=P.role==='student'?lsGet('trial-resume:'+P.id):null;
   if(rs&&lsGet(examKey(rs.a)))await go('sExam',{a:rs.a});
@@ -994,8 +997,8 @@ H.clearTerm=async function(){var f=R.f;f.err='';f.ok='';try{await rpc('m_set_ter
 function vGSub(){
   var g=C.mg,c=R.gc;
   var form='<div class="card"><h3>إضافة مادة</h3><div class="row" style="align-items:flex-end">'+fld('اسم المادة','subn')+btn('إضافة','addSub')+'</div></div>';
-  var rows=g.subjects.map(function(s){return '<tr><td>'+esc(s.name)+'</td><td>'+(c&&c.k==='dsub'&&+c.id===s.id?'<span class="sub">ستختفي من كل المدارس (بياناتها القديمة تبقى محفوظة). متأكد؟</span> '+btn('نعم، احذف','gDo','','sm')+' '+btn('إلغاء','gNo','','sec sm'):btn('حذف','gAsk',{k:'dsub',id:s.id},'sec sm'))+'</td></tr>'}).join('');
-  return '<h1>المواد</h1>'+okm()+err()+form+'<div class="card"><h3>المواد ('+n(g.subjects.length)+')</h3><div class="tbl"><table><thead><tr><th>المادة</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="2">لا توجد مواد.</td></tr>')+'</tbody></table></div></div>'}
+  var rows=g.subjects.map(function(s){var gb=[1,2,3].map(function(k){var on=gsHas(k,s.id);return '<button type="button" class="tab'+(on?' on':'')+'" data-act="sgTog" data-s="'+s.id+'" data-g="'+k+'" aria-pressed="'+(on?'true':'false')+'">'+GN[k]+'</button>'}).join('');return '<tr><td>'+esc(s.name)+'</td><td><div class="tabs" role="group" aria-label="سنوات '+esc(s.name)+'">'+gb+'</div>'+((REF.gs||[]).some(function(y){return y.s==s.id})?'':'<div class="sub">لم تُحدَّد لها سنة: لن تظهر للمدارس.</div>')+'</td><td>'+(c&&c.k==='dsub'&&+c.id===s.id?'<span class="sub">ستختفي من كل المدارس (بياناتها القديمة تبقى محفوظة). متأكد؟</span> '+btn('نعم، احذف','gDo','','sm')+' '+btn('إلغاء','gNo','','sec sm'):btn('حذف','gAsk',{k:'dsub',id:s.id},'sec sm'))+'</td></tr>'}).join('');
+  return '<h1>المواد</h1>'+okm()+err()+form+'<div class="card"><h3>المواد ('+n(g.subjects.length)+')</h3><div class="tbl"><table><thead><tr><th>المادة</th><th>السنوات الدراسية</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="3">لا توجد مواد.</td></tr>')+'</tbody></table></div></div>'}
 H.gAsk=function(ds){R.gc={k:ds.k,id:ds.id,sid:ds.sid?+ds.sid:undefined,code:ds.code,name:ds.name};R.f.rpw='';R.f.dcode='';R.f.err='';R.f.ok='';draw()};
 H.gNo=function(){R.gc=null;draw()};
 H.gDo=async function(){
@@ -1027,9 +1030,12 @@ H.addEd=async function(){
     await refreshMg();MODAL=credHtml([r],'بيانات دخول المحرر');f.ename='';f.epw='';f.ok='تم إنشاء حساب المحرر.'}
   catch(e){f.err=emsg(e)}
   R.busy=false;draw()};
+H.sgTog=async function(ds){var f=R.f,sid=+ds.s,g=+ds.g;f.err='';f.ok='';var cur=(REF.gs||[]).filter(function(x){return x.s==sid}).map(function(x){return x.g});var i=cur.indexOf(g);if(i>-1)cur.splice(i,1);else cur.push(g);
+  try{await rpc('m_set_subject_grades',{p_subject:sid,p_grades:cur});REF=await rpc('ref_data');rcClear('ref_data')}catch(e){f.err=emsg(e)}
+  draw()};
 H.addSub=async function(){
   var f=R.f;f.err='';f.ok='';
-  try{await rpc('m_add_subject',{p_name:f.subn||''});await refreshMg();REF=await rpc('ref_data');f.subn='';f.ok='تمت إضافة المادة.'}
+  try{await rpc('m_add_subject',{p_name:f.subn||''});await refreshMg();REF=await rpc('ref_data');f.subn='';f.ok='تمت إضافة المادة. اختر السنوات اللي بتاخدها من الجدول.'}
   catch(e){f.err=emsg(e)}
   draw()};
 
