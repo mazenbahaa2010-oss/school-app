@@ -1,2 +1,2 @@
-{"name":"المدرسة الإلكترونية","short_name":"المدرسة","lang":"ar","dir":"rtl","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#0B6E69","theme_color":"#0B6E69",
-"icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
+{"name":"تقييمي","short_name":"تقييمي","description":"المنصة الإلكترونية للتقييمات والأداءات","lang":"ar","dir":"rtl","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#0E7C73","theme_color":"#0E7C73",
+"icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"icon-m-192.png","sizes":"192x192","type":"image/png","purpose":"maskable"},{"src":"icon-m-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]}
