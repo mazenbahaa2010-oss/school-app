@@ -1,5 +1,5 @@
-/* VERSION:20261118121344 */
-var CACHE='school-20261118121344',SHELL=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-m-192.png','icon-m-512.png','apple-touch-icon.png','favicon.png'];
+/* VERSION:20261117234838 */
+var CACHE='school-20261117234838',SHELL=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(SHELL)}).then(function(){return self.skipWaiting()}))});
 self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k!==CACHE}).map(function(k){return caches.delete(k)}))}).then(function(){return self.clients.claim()}))});
 self.addEventListener('fetch',function(e){
