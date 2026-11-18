@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>المدرسة الإلكترونية</title><meta name="theme-color" content="#0B6E69"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<title>تقييمي</title><meta name="theme-color" content="#0E7C73"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 
@@ -194,6 +194,11 @@ h3.hd .hi{width:34px;height:34px;border-radius:10px}
 .icb svg{width:26px;height:26px}.icb.on{border:2px solid var(--pri);background:var(--prit);color:var(--pri2)}
 .icbtn{border:0;cursor:pointer;width:44px;height:44px;border-radius:14px;vertical-align:middle;display:inline-flex}
 .dbar{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;margin-top:16px;background:var(--card);border:1px solid var(--bd);border-radius:18px;box-shadow:0 -6px 18px rgba(0,0,0,.06)}
+
+/* ===== هوية تقييمي ===== */
+.brand .lg{border-radius:10px}
+.auth .lg{border-radius:20px}
+.slogan{color:var(--pri2);font-size:1.05rem;margin-top:2px}
 </style></head><body>
 <div id="app"></div><div id="modal"></div>
 <script>window.TRIAL_CFG={url:"https://tcftictbslobminfeuww.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjZnRpY3Ric2xvYm1pbmZldXd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MzYyOTMsImV4cCI6MjExMDExMjI5M30.dBGxPb7scgEjRGZ2zztMqPSzzIZoKwC6C--EjdTqn98"};</script>
@@ -293,6 +298,8 @@ function sel(l,k,opts,rr){var v=R.f&&R.f[k];return '<label class="fld"><span>'+l
 function err(){return R.f&&R.f.err?'<div class="msg bad" role="alert">'+esc(R.f.err)+'</div>':''}
 function okm(){return R.f&&R.f.ok?'<div class="msg ok" role="status">'+esc(R.f.ok)+'</div>':''}
 function stepper(act,o,v,mx){return '<span class="row" style="gap:8px;flex-wrap:nowrap">'+btn('▼',act,Object.assign({d:-.5},o),'sec sm')+'<b style="min-width:92px;text-align:center">'+(v==null?'—':fmtN(v))+' من '+fmtN(mx)+'</b>'+btn('▲',act,Object.assign({d:.5},o),'sec sm')+btn('صفر',act,Object.assign({d:'zero'},o),'sec sm')+'</span>'}
+var BRAND='تقييمي',BRAND_DESC='المنصة الإلكترونية للتقييمات والأداءات',BRAND_SLOGAN='قياس دقيق.. وتعلّم أفضل';
+function logoSvg(sz,dark){return '<svg class="lg" width="'+sz+'" height="'+sz+'" viewBox="0 0 100 100" role="img" aria-label="شعار '+BRAND+'"><rect width="100" height="100" rx="24" fill="'+(dark?'#111A1C':'#0E7C73')+'"/><rect x="28" y="18" width="44" height="62" rx="7" fill="#fff"/><rect x="36" y="28" width="28" height="4.5" rx="2.2" fill="#BFE3DE"/><rect x="36" y="37" width="18" height="4.5" rx="2.2" fill="#BFE3DE"/><rect x="33" y="62" width="6" height="9" rx="2" fill="#0E7C73"/><rect x="42" y="56" width="6" height="15" rx="2" fill="#0E7C73"/><rect x="51" y="49" width="6" height="22" rx="2" fill="#0E7C73"/><circle cx="70" cy="72" r="13" fill="#F2B84B" stroke="#0E7C73" stroke-width="4"/><path d="M64 72l4.5 4.5 8-9" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
 var ICON='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5V21.5"/></svg>';
 var SV=function(p){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>'};
 var SIC={book:SV('<path d="M4 19V5l8 3 8-3v14l-8-3z"/><path d="M12 8v11"/>'),globe:SV('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'),flask:SV('<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>'),bulb:SV('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10c1 1 1 2 1 3h6c0-1 0-2 1-3a6 6 0 0 0-4-10z"/>'),calc:SV('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/>'),clock:SV('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),check:SV('<path d="M5 12l5 5 9-10"/>'),inbox:SV('<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/>'),user:SV('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'),flag:SV('<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>'),
@@ -367,13 +374,13 @@ function toastHtml(){return TOAST?'<div class="toast" role="status"><span>'+esc(
 function toast(msg,undo){TOAST={msg:msg,undo:undo||null};clearTimeout(TT);TT=setTimeout(function(){TOAST=null;draw()},8000);draw()}
 function shell(inner){
   var nav=navFor(),q=C.queue.length;
-  return '<header class="top"><div class="brand"><span class="logo">'+ICON+'</span><b>المدرسة الإلكترونية</b></div><nav>'+nav.map(function(x){var b=badgeFor(x[0]);if(x[0]==='notes')return '<button type="button" class="nv bell'+(R.v==='notes'?' on':'')+'" data-act="go" data-v="notes" aria-label="الإشعارات" title="الإشعارات">'+SIC.bell+'<span class="badge warn" data-bd="notes"'+(b?'':' hidden')+'>'+b+'</span></button>';return '<button type="button" class="nv'+(R.v===x[0]||(x[2]&&x[2].indexOf(R.v)>-1)?' on':'')+'" data-act="go" data-v="'+x[0]+'">'+x[1]+' <span class="badge warn" data-bd="'+x[0]+'"'+(b?'':' hidden')+'>'+b+'</span></button>'}).join('')+'</nav><div class="who">'+netB()+(q?bdg('بانتظار رفع '+n(q),'warn'):'')+'<button type="button" class="av" data-act="go" data-v="profile" aria-label="حسابي" title="حسابي">'+esc(ini(P.name))+'</button></div></header><main class="wrap'+(ENTER?' enter':'')+'">'+banners()+toastHtml()+inner+'</main>'}
+  return '<header class="top"><div class="brand">'+logoSvg(38)+'<b>'+BRAND+'</b></div><nav>'+nav.map(function(x){var b=badgeFor(x[0]);if(x[0]==='notes')return '<button type="button" class="nv bell'+(R.v==='notes'?' on':'')+'" data-act="go" data-v="notes" aria-label="الإشعارات" title="الإشعارات">'+SIC.bell+'<span class="badge warn" data-bd="notes"'+(b?'':' hidden')+'>'+b+'</span></button>';return '<button type="button" class="nv'+(R.v===x[0]||(x[2]&&x[2].indexOf(R.v)>-1)?' on':'')+'" data-act="go" data-v="'+x[0]+'">'+x[1]+' <span class="badge warn" data-bd="'+x[0]+'"'+(b?'':' hidden')+'>'+b+'</span></button>'}).join('')+'</nav><div class="who">'+netB()+(q?bdg('بانتظار رفع '+n(q),'warn'):'')+'<button type="button" class="av" data-act="go" data-v="profile" aria-label="حسابي" title="حسابي">'+esc(ini(P.name))+'</button></div></header><main class="wrap'+(ENTER?' enter':'')+'">'+banners()+toastHtml()+inner+'</main>'}
 function loading(){return '<div class="sk" style="min-height:44px;max-width:240px"></div><div class="grid"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div><span class="sub" role="status">جارٍ التحميل…</span>'}
 function failed(){return '<div class="empty">'+SIC.inbox+'<b>تعذّر تحميل الصفحة</b><span>اتأكد من النت وجرّب تاني.</span><details class="sub"><summary>التفاصيل</summary>'+esc(LOADERR)+'</details>'+btn('إعادة المحاولة','reload')+'</div>'}
 
 /* ---------- الدخول ---------- */
 function vLogin(){
-  return '<div class="auth"><div class="row" style="justify-content:flex-end">'+themeBtn()+'</div><div class="center card" style="gap:6px"><span class="logo" style="width:56px;height:56px">'+ICON+'</span><h1>المدرسة الإلكترونية</h1><span class="sub">نسخة تجريبية</span></div><form class="card" data-submit="doLogin">'+fld('الكود أو اسم المستخدم','code',{ph:'مثال: 10452-s-0001',dir:'ltr',ac:'username'})+fld('كلمة المرور','pw',{type:R.f.showpw?'text':'password',ac:'current-password',dir:'ltr'})+'<div class="row" style="margin-top:-6px"><button type="button" class="lnk" data-act="togglePw" aria-pressed="'+(R.f.showpw?'true':'false')+'">'+(R.f.showpw?'🙈 إخفاء كلمة المرور':'👁 إظهار كلمة المرور')+'</button></div>'+err()+'<button class="btn" type="submit"'+(BUSY?' disabled':'')+'>'+(BUSY?'جارٍ الدخول…':'دخول')+'</button><span class="hint">الكود تحصل عليه من إدارة المدرسة، وكلمة المرور المؤقتة تُعطى لك معه.</span></form>'+forgotHtml()+'<details class="first"><summary>أول مرة تدخل؟</summary><ol><li>اطلب كودك وكلمة مرورك المؤقتة من إدارة المدرسة.</li><li>اكتب الكود وكلمة المرور واضغط «دخول».</li><li>غيّر كلمة مرورك من صفحة «حسابي» (الدائرة اللي فوق).</li></ol></details></div>'}
+  return '<div class="auth"><div class="row" style="justify-content:flex-end">'+themeBtn()+'</div><div class="center card" style="gap:6px">'+logoSvg(84)+'<h1>'+BRAND+'</h1><span class="sub">'+BRAND_DESC+'</span><b class="slogan">'+BRAND_SLOGAN+'</b>'+bdg('نسخة تجريبية','warn')+'</div><form class="card" data-submit="doLogin">'+fld('الكود أو اسم المستخدم','code',{ph:'مثال: 10452-s-0001',dir:'ltr',ac:'username'})+fld('كلمة المرور','pw',{type:R.f.showpw?'text':'password',ac:'current-password',dir:'ltr'})+'<div class="row" style="margin-top:-6px"><button type="button" class="lnk" data-act="togglePw" aria-pressed="'+(R.f.showpw?'true':'false')+'">'+(R.f.showpw?'🙈 إخفاء كلمة المرور':'👁 إظهار كلمة المرور')+'</button></div>'+err()+'<button class="btn" type="submit"'+(BUSY?' disabled':'')+'>'+(BUSY?'جارٍ الدخول…':'دخول')+'</button><span class="hint">الكود تحصل عليه من إدارة المدرسة، وكلمة المرور المؤقتة تُعطى لك معه.</span></form>'+forgotHtml()+'<details class="first"><summary>أول مرة تدخل؟</summary><ol><li>اطلب كودك وكلمة مرورك المؤقتة من إدارة المدرسة.</li><li>اكتب الكود وكلمة المرور واضغط «دخول».</li><li>غيّر كلمة مرورك من صفحة «حسابي» (الدائرة اللي فوق).</li></ol></details></div>'}
 function forgotHtml(){
   var f=R.f;
   if(!f.fgo)return '<div class="row" style="justify-content:center"><button type="button" class="lnk" data-act="forgotOpen">نسيت كلمة المرور؟</button></div>';
@@ -607,6 +614,10 @@ function pwHtml(){
   return '<h2>تغيير كلمة المرور</h2>'+fld('كلمة المرور الحالية','opw',{type:t,ac:'current-password',dir:'ltr'})+fld('كلمة المرور الجديدة','npw',{type:t,ac:'new-password',dir:'ltr',hint:'٦ أحرف على الأقل'})+fld('أعد كتابة الجديدة','npw2',{type:t,ac:'new-password',dir:'ltr'})+'<div class="row"><button type="button" class="lnk" data-act="togglePw">'+(f.showpw?'🙈 إخفاء':'👁 إظهار')+'</button></div>'+m+'<div class="row">'+btn(BUSY?'جارٍ الحفظ…':'حفظ كلمة المرور','doMyPw','','',BUSY)+btn('إلغاء','closeModal','','sec')+'</div>'}
 
 /* ---------- PDF مباشر (بدون طباعة): صفحات مرسومة على canvas ومحزومة في ملف PDF ---------- */
+function pdfLogo(c,x,y,sz){var k=sz/100;function rr(a,b,w,h,r,f){c.fillStyle=f;c.beginPath();c.moveTo(x+(a+r)*k,y+b*k);c.arcTo(x+(a+w)*k,y+b*k,x+(a+w)*k,y+(b+h)*k,r*k);c.arcTo(x+(a+w)*k,y+(b+h)*k,x+a*k,y+(b+h)*k,r*k);c.arcTo(x+a*k,y+(b+h)*k,x+a*k,y+b*k,r*k);c.arcTo(x+a*k,y+b*k,x+(a+w)*k,y+b*k,r*k);c.closePath();c.fill()}
+  c.save();rr(0,0,100,100,24,'#0E7C73');rr(28,18,44,62,7,'#fff');rr(36,28,28,4.5,2.2,'#BFE3DE');rr(36,37,18,4.5,2.2,'#BFE3DE');[[33,62,9],[42,56,15],[51,49,22]].forEach(function(b){rr(b[0],b[1],6,b[2],2,'#0E7C73')});
+  c.beginPath();c.arc(x+70*k,y+72*k,15*k,0,7);c.fillStyle='#0E7C73';c.fill();c.beginPath();c.arc(x+70*k,y+72*k,13*k,0,7);c.fillStyle='#F2B84B';c.fill();
+  c.strokeStyle='#fff';c.lineWidth=4.5*k;c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(x+64*k,y+72*k);c.lineTo(x+68.5*k,y+76.5*k);c.lineTo(x+76.5*k,y+67.5*k);c.stroke();c.restore()}
 function makePdf(title,sub,heads,rows,note,fname){
   var land=heads.length>7,W=land?1754:1240,Hh=land?1240:1754,M=70,cols=heads.length,PW=land?842:595,PH=land?595:842;
   var fs=cols>12?19:(cols>7?23:27),RH=Math.round(fs*2),FF='Cairo,Tahoma,"Segoe UI",Arial,sans-serif';
@@ -627,7 +638,8 @@ function makePdf(title,sub,heads,rows,note,fname){
   function newPage(first){
     if(pn){pages.push(cv.toDataURL('image/jpeg',.82))}
     pn++;cx.fillStyle='#fff';cx.fillRect(0,0,W,Hh);cx.direction='rtl';cx.textAlign='right';y=M;
-    if(first){cx.fillStyle='#0b6e69';cx.font='bold '+(fs+12)+'px '+FF;cx.fillText(title,W-M,y+fs+8);y+=fs*3.2;
+    if(first){pdfLogo(cx,M,y-6,Math.round(fs*2.6));cx.save();cx.direction='rtl';cx.textAlign='left';cx.fillStyle='#0b6e69';cx.font='bold '+Math.round(fs*1.1)+'px '+FF;cx.fillText(BRAND,M+Math.round(fs*2.6)+14,y+fs*0.95);cx.fillStyle='#667';cx.font=Math.round(fs*0.62)+'px '+FF;cx.fillText(BRAND_DESC,M+Math.round(fs*2.6)+14,y+fs*1.8);cx.restore();y+=fs*3.4;
+      cx.fillStyle='#0b6e69';cx.font='bold '+(fs+12)+'px '+FF;cx.fillText(title,W-M,y+fs+8);y+=fs*3.2;
       cx.fillStyle='#555';cx.font=(fs-3)+'px '+FF;cx.fillText(sub,W-M,y);y+=fs*1.6}
     head()}
   newPage(true);
