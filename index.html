@@ -199,6 +199,22 @@ h3.hd .hi{width:34px;height:34px;border-radius:10px}
 .brand .lg{border-radius:10px}
 .auth .lg{border-radius:20px}
 .slogan{color:var(--pri2);font-size:1.05rem;margin-top:2px}
+
+/* ===== v12: خصوصية، جولة، عن التطبيق، قوة كلمة المرور ===== */
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg)}
+.gcard{background:var(--card);border:1px solid var(--bd);border-radius:22px;box-shadow:var(--shadow);max-width:560px;width:100%;padding:26px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.gcard h1{margin:0;font-size:1.5rem}
+.gcard .tp{margin:0;font-size:1.1rem;line-height:1.9}
+.priv{margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:8px;line-height:1.8}
+.dots{display:flex;gap:8px}.dot{width:10px;height:10px;border-radius:50%;background:var(--bd)}.dot.on{background:#0E7C73;width:26px;border-radius:6px}
+.abt{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}.abt h2{margin:6px 0 0}
+.pwm{display:flex;flex-direction:column;gap:4px}
+.pwm .bar{display:flex;gap:4px}.pwm .bar i{flex:1;height:7px;border-radius:4px;background:var(--bd)}
+.pwm[data-s="1"] .bar i:nth-child(-n+1){background:#D9534F}
+.pwm[data-s="2"] .bar i:nth-child(-n+2){background:#F2B84B}
+.pwm[data-s="3"] .bar i:nth-child(-n+3){background:#7FB77E}
+.pwm[data-s="4"] .bar i{background:#0E7C73}
+.pwm .lb{font-size:13px;color:var(--mut);min-height:18px}
 </style></head><body>
 <div id="app"></div><div id="modal"></div>
 <script>window.TRIAL_CFG={url:"https://tcftictbslobminfeuww.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjZnRpY3Ric2xvYm1pbmZldXd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MzYyOTMsImV4cCI6MjExMDExMjI5M30.dBGxPb7scgEjRGZ2zztMqPSzzIZoKwC6C--EjdTqn98"};</script>
@@ -283,7 +299,7 @@ function rcClear(p){try{Object.keys(localStorage).forEach(function(k){if(k.index
 async function login(code,pw){
   var j=await http('/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:CFG.key,'Content-Type':'application/json'},body:JSON.stringify({email:lat(code).toLowerCase()+'@school.app',password:pw})});
   setSes(j)}
-function doLogout(){DR=null;rcClear();SES=null;P=null;C={unread:0,pend:0,queue:[]};lsDel('trial-ses');R={v:'login',f:{}};MODAL='';draw()}
+function doLogout(){try{pushDrop()}catch(e){}DR=null;GATE='';rcClear();SES=null;P=null;C={unread:0,pend:0,queue:[]};lsDel('trial-ses');R={v:'login',f:{}};MODAL='';draw()}
 
 /* ---------- عناصر الواجهة ---------- */
 function setModal(f){MODALF=f;MODAL=MODALL=f();draw()}
@@ -481,8 +497,9 @@ function vProfile(){
   return '<h1>حسابي</h1>'+okm()+err()+'<div class="card"><div class="pf"><span class="av" aria-hidden="true">'+esc(ini(P.name))+'</span><div><h2>'+esc(P.name)+'</h2><span class="sub">'+(ROLE_AR[P.role]||'')+(P.school?' · '+esc(P.school):'')+'</span></div></div><dl class="kv">'+dl+'</dl></div>'+
    '<div class="card"><h3>كلمة المرور</h3><div class="row"><span style="font-size:1.4rem;letter-spacing:4px" aria-label="مخفية">••••••••</span>'+btn('تغيير كلمة المرور','myPw','','sec sm')+'</div><span class="hint">كلمة المرور محفوظة مشفّرة ولا تُعرض لأي حد. لو نسيتها اطلب من مدير المدرسة كلمة جديدة.</span></div>'+
    '<div class="card"><h3>المظهر</h3><div><b>الوضع</b>'+seg([['auto','تلقائي'],['light','نهاري'],['dark','ليلي']],th,'setTheme')+'</div><div><b>حجم الخط</b>'+seg([['md','عادي'],['lg','كبير'],['xl','كبير جداً']],fs,'setFs')+'</div></div>'+
-   '<div class="card"><h3>التطبيق والإشعارات</h3><div class="row">'+(INST?btn('تثبيت التطبيق','install','','sec sm'):'<span class="hint">للتثبيت: من قائمة Chrome اختر «تثبيت التطبيق».</span>')+np+'</div></div>'+
-   '<div class="card"><h3>الاتصال</h3><div class="row">'+netB()+'<span class="sub">آخر مزامنة: '+(LASTSYNC?ft(LASTSYNC):'—')+'</span>'+btn('تحديث','refreshNow','','sec sm')+'</div></div>'+rep+
+   '<div class="card"><h3>التطبيق والإشعارات</h3><div class="row">'+(INST?btn('تثبيت التطبيق','install','','sec sm'):'<span class="hint">للتثبيت: من قائمة Chrome اختر «تثبيت التطبيق».</span>')+np+'</div><div class="row">'+pushRow()+'</div></div>'+
+   '<div class="card"><h3>الاتصال</h3><div class="row">'+netB()+'<span class="sub">آخر مزامنة: '+(LASTSYNC?ft(LASTSYNC):'—')+'</span>'+btn('تحديث','refreshNow','','sec sm')+'</div></div>'+nameCard()+rep+
+   '<div class="card"><h3>المساعدة</h3><div class="row">'+btn('جولة تعريفية','tourOpen','','sec sm')+btn('إشعار الخصوصية','showPriv','','sec sm')+btn('عن التطبيق','about','','sec sm')+'</div>'+(P.consent_at?'<span class="hint">وافقت على إشعار الخصوصية بتاريخ '+fd(P.consent_at)+'</span>':'')+'</div>'+
    '<div class="row">'+btn('تسجيل الخروج','logout','','sec')+'</div>'}
 H.setTheme=function(ds){if(ds.t==='auto')lsDel('trial-theme');else lsSet('trial-theme',ds.t);applyTheme();draw()};
 H.setFs=function(ds){if(ds.t==='md')lsDel('trial-fs');else lsSet('trial-fs',ds.t);applyTheme();draw()};
@@ -611,7 +628,7 @@ function editHtml(){
   return '<h2>تعديل بيانات المدرس</h2><div class="sub">الكود '+esc(e.code)+' (لا يتغير)</div>'+fld('الاسم','en')+'<div><b>المواد</b>'+subsAny(f.esubs).map(function(x){return '<label class="chk"><input type="checkbox" data-chg="esub" data-id="'+x.id+'"'+((f.esubs||[]).indexOf(x.id)>-1?' checked':'')+'><span>'+esc(x.name)+'</span></label>'}).join('')+'</div>'+m+bt}
 function pwHtml(){
   var f=R.f,t=f.showpw?'text':'password',m=f.merr?'<div class="msg bad" role="alert">'+esc(f.merr)+'</div>':'';
-  return '<h2>تغيير كلمة المرور</h2>'+fld('كلمة المرور الحالية','opw',{type:t,ac:'current-password',dir:'ltr'})+fld('كلمة المرور الجديدة','npw',{type:t,ac:'new-password',dir:'ltr',hint:'٦ أحرف على الأقل'})+fld('أعد كتابة الجديدة','npw2',{type:t,ac:'new-password',dir:'ltr'})+'<div class="row"><button type="button" class="lnk" data-act="togglePw">'+(f.showpw?'🙈 إخفاء':'👁 إظهار')+'</button></div>'+m+'<div class="row">'+btn(BUSY?'جارٍ الحفظ…':'حفظ كلمة المرور','doMyPw','','',BUSY)+btn('إلغاء','closeModal','','sec')+'</div>'}
+  return '<h2>تغيير كلمة المرور</h2>'+fld('كلمة المرور الحالية','opw',{type:t,ac:'current-password',dir:'ltr'})+fld('كلمة المرور الجديدة','npw',{type:t,ac:'new-password',dir:'ltr',hint:'٦ أحرف على الأقل'})+pwMeter(f.npw)+fld('أعد كتابة الجديدة','npw2',{type:t,ac:'new-password',dir:'ltr'})+'<div class="row"><button type="button" class="lnk" data-act="togglePw">'+(f.showpw?'🙈 إخفاء':'👁 إظهار')+'</button></div>'+m+'<div class="row">'+btn(BUSY?'جارٍ الحفظ…':'حفظ كلمة المرور','doMyPw','','',BUSY)+btn('إلغاء','closeModal','','sec')+'</div>'}
 
 /* ---------- PDF مباشر (بدون طباعة): صفحات مرسومة على canvas ومحزومة في ملف PDF ---------- */
 function pdfLogo(c,x,y,sz){var k=sz/100;function rr(a,b,w,h,r,f){c.fillStyle=f;c.beginPath();c.moveTo(x+(a+r)*k,y+b*k);c.arcTo(x+(a+w)*k,y+b*k,x+(a+w)*k,y+(b+h)*k,r*k);c.arcTo(x+(a+w)*k,y+(b+h)*k,x+a*k,y+(b+h)*k,r*k);c.arcTo(x+a*k,y+(b+h)*k,x+a*k,y+b*k,r*k);c.arcTo(x+a*k,y+b*k,x+(a+w)*k,y+b*k,r*k);c.closePath();c.fill()}
@@ -690,7 +707,7 @@ function vAOver(){
   return '<div><h1 class="hd">'+HI('home')+esc(a.school.name)+'</h1><span class="sub">كود المدرسة '+esc(a.school.code)+'</span></div><div class="row"><div class="stat"><span class="sub">الطلاب</span><b>'+n(a.students.length)+'</b></div><div class="stat"><span class="sub">المدرسون</span><b>'+n(a.teachers.length)+'</b></div><div class="stat"><span class="sub">الفصول</span><b>'+n(a.classes.length)+'</b></div></div>'+
    (!a.classes.length?'<div class="msg warn">لا توجد فصول بعد. ابدأ من تبويب «الفصول».</div>':'')+
    (no?'<div class="msg warn">'+n(no)+' طالب لم يُضافوا إلى أي فصل. أضفهم من تبويب «الفصول».</div>':'')+
-   reqHtml()+repHtml()+
+   reqHtml()+nameReqHtml()+repHtml()+
    '<div class="card"><h3 class="hd">'+HI('users')+'الفصول</h3><div class="tbl"><table><thead><tr><th>الفصل</th><th>السنة</th><th>الطلاب</th><th>المدرسون</th></tr></thead><tbody>'+(a.classes.length?a.classes.map(function(c){return '<tr><td>'+esc(c.name)+'</td><td>'+GN[c.grade_id]+'</td><td>'+n(c.students.length)+'</td><td>'+n(c.teachers.length)+' مادة</td></tr>'}).join(''):'<tr><td colspan="4">—</td></tr>')+'</tbody></table></div></div>'}
 function vAStu(){
   var a=C.ad,f=R.f,g=+f.g||1,cl=a.classes.filter(function(c){return c.grade_id===g});
@@ -855,6 +872,58 @@ async function mDoSave(){
   lsDel(old);m.id=id;R.mid=id;m.dirty=false;m.restored=false;return id}
 
 /* ---------- الرسم ---------- */
+/* ======================= النسخة ١٢: خصوصية، جولة، عن التطبيق، قوة كلمة المرور، تغيير الاسم، Web Push ======================= */
+var APP_VER='12',APP_DATE='2026-11-20',PRIV_VER=1;
+var PRIV_ITEMS=['نجمع اسمك وكودك وسنتك الدراسية وفصلك ومدرستك، وإجاباتك ودرجاتك داخل التطبيق فقط.','نستخدم البيانات لتشغيل التقييمات والأداءات وعرض النتائج لك ولمدرسيك ولمدير مدرستك.','لا نبيع بياناتك ولا نشاركها مع أي جهة خارج المنظومة التعليمية.','كلمة المرور محفوظة مشفّرة ولا يراها أي شخص، حتى مدير المدرسة.','تُحفظ إجاباتك مؤقتاً على جهازك لتعمل بدون إنترنت، وتُرفع عند توفر الاتصال.','تنبيهات الجهاز اختيارية، ولا تحتوي على أسماء أو درجات.','في نهاية السنة الدراسية تُحذف سجلات الطلاب حسب قرار المدرسة.','تقدر تطلب تصحيح بياناتك من مدير المدرسة في أي وقت من صفحة «حسابي».'];
+var TOURS={
+ student:[['المواد والتقييمات','من الصفحة الرئيسية اختر المادة، وبعدها تقييمات أو أداءات صفية أو أداءات منزلية. الأسبوع بيتفتح لما المدرس يفتحه (والمنزلي بيفتح لوحده في أسبوعه).'],['وقت الامتحان','إجاباتك بتتحفظ على جهازك حتى لو النت فصل، وبترفع تلقائياً لما يرجع. اضغط «تسليم» في الآخر.'],['درجاتك وأخطاؤك','من «درجاتي» تشوف نتايجك، ومن «أخطائي» تراجع أسئلتك الغلط. والإشعارات بتعرفك بأي جديد.']],
+ teacher:[['فصولك وصفحة اليوم','«اليوم» بيعرض اللي مفتوح دلوقتي واللي جاهز للفتح. «فصولي» فيها كل فصولك ومواده.'],['افتح التقييم لفصلك','اختر الأسبوع والنوع، حدّد مدة الحصة (٣٥ دقيقة على الأقل)، واختر مين ياخد الفتح لو فيه طالب غايب.'],['التصحيح واعتماد النتيجة','المقالي بيوصلك تصححه (صفر أو نص أو درجة). عدّل براحتك وفي الآخر اضغط «اعتمد النتيجة» عشان توصل للطلاب.']],
+ school_admin:[['الطلاب والمدرسون','أضف الحسابات وعدّل بياناتها، واكتب كلمات المرور أو اقترح واحدة، وتقدر تطبع ورقة بيانات الدخول.'],['الفصول','كوّن الفصول وحدد مواد كل فصل ومدرسها، وتقدر تراجع (تتراجع) عن حذف فصل.'],['الطلبات والبلاغات','في «نظرة عامة» هتلاقي طلبات كلمة المرور وطلبات تغيير الاسم وبلاغات البيانات الخاطئة. وفي آخر السنة فيه صفحة الترقية.']],
+ ministry_manager:[['التقييمات والأداءات','اكتب الأسئلة (اختيار أو مقالي) وحدد الدرجات والصور. النشر بتأكيدين ولا يمكن تعديل المنشور.'],['المدارس والمحررون','أنشئ المدارس وحسابات مديريها، وأضف محررين بكلمات مرور تكتبها.'],['المواد والسنوات','أضف المواد واختر أيقونتها وحدد السنوات الدراسية اللي بتدرسها.']]};
+TOURS.ministry_editor=TOURS.ministry_manager;
+var GATE='',TSTEP=0;
+function gateFor(){if(!P)return '';if(!P.consent_ver||P.consent_ver<PRIV_VER)return 'privacy';if(!P.tour_at)return 'tour';return ''}
+function vPrivacy(){var f=R.f;return '<div class="gate"><div class="gcard">'+logoSvg(56)+'<h1>إشعار الخصوصية</h1><span class="sub">قبل ما تبدأ، اقرأ الآتي:</span><ul class="priv">'+PRIV_ITEMS.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>'+err()+'<label class="opt"><input type="checkbox" id="privok"'+(f.privok?' checked':'')+' data-chg="privok"><span>قرأت الإشعار وأوافق</span></label><div class="row">'+btn(BUSY?'جارٍ الحفظ…':'متابعة','acceptPriv','','',!f.privok||BUSY)+btn('خروج','logout','','sec')+'</div></div></div>'}
+H.acceptPriv=async function(){var f=R.f;f.err='';BUSY=true;draw();try{await rpc('accept_privacy',{p_ver:PRIV_VER});P.consent_ver=PRIV_VER;P.consent_at=new Date().toISOString();rcClear();GATE=gateFor()}catch(e){f.err=emsg(e)}BUSY=false;draw()};
+function vTour(){var t=TOURS[P.role]||TOURS.student,i=TSTEP,c=t[i],last=i===t.length-1;
+  return '<div class="gate"><div class="gcard">'+logoSvg(56)+'<span class="sub">جولة سريعة · '+n(i+1)+' من '+n(t.length)+'</span><h1>'+esc(c[0])+'</h1><p class="tp">'+esc(c[1])+'</p><div class="dots">'+t.map(function(_,k){return '<span class="dot'+(k===i?' on':'')+'"></span>'}).join('')+'</div><div class="row">'+(i>0?btn('السابق','tourPrev','','sec'):'')+btn(last?'ابدأ الاستخدام':'التالي','tourNext')+(last?'':btn('تخطي','tourEnd','','sec'))+'</div></div></div>'}
+H.tourNext=function(){var t=TOURS[P.role]||TOURS.student;if(TSTEP>=t.length-1)return H.tourEnd();TSTEP++;draw()};
+H.tourPrev=function(){if(TSTEP>0)TSTEP--;draw()};
+H.tourEnd=async function(){GATE='';TSTEP=0;P.tour_at=P.tour_at||new Date().toISOString();draw();try{await rpc('tour_finished')}catch(e){}};
+H.tourOpen=function(){TSTEP=0;GATE='tour';window.scrollTo(0,0);draw()};
+/* قوة كلمة المرور */
+function pwScore(p){p=p||'';if(!p)return 0;var s=0;if(p.length>=6)s++;if(p.length>=9)s++;if(/[a-zA-Z؀-ۿ]/.test(p)&&/\d/.test(p))s++;if(/[^\w؀-ۿ]/.test(p)||(/[a-z]/.test(p)&&/[A-Z]/.test(p)))s++;if(/^(.)\1+$/.test(p)||/^(123456|password|000000|111111|123123)/i.test(p))s=Math.min(s,1);return Math.min(s,4)}
+var PW_LBL=['','ضعيفة','مقبولة','جيدة','قوية'];
+function pwMeter(p){var s=pwScore(p);return '<div class="pwm" id="pwm" data-s="'+s+'"><span class="bar"><i></i><i></i><i></i><i></i></span><span class="lb">'+(s?'قوة كلمة المرور: '+PW_LBL[s]:'')+'</span></div>'}
+/* عن التطبيق */
+function aboutHtml(){return '<div class="abt">'+logoSvg(64)+'<h2>'+BRAND+'</h2><span class="sub">'+BRAND_DESC+'</span><span class="sub">'+BRAND_SLOGAN+'</span></div><dl class="kv"><dt>رقم النسخة</dt><dd dir="ltr">'+APP_VER+'</dd><dt>تاريخ النسخة</dt><dd dir="ltr">'+APP_DATE+'</dd><dt>الحالة</dt><dd>نسخة تجريبية</dd></dl><span class="hint">تطبيق للتقييمات والأداءات الصفية والمنزلية لطلاب المرحلة الثانوية.</span><div class="row">'+btn('إشعار الخصوصية','showPriv','','sec sm')+btn('إغلاق','closeModal','','sec')+'</div>'}
+H.about=function(){setModal(aboutHtml)};
+H.showPriv=function(){setModal(function(){return '<h2>إشعار الخصوصية</h2>'+(P.consent_at?'<span class="sub">وافقت عليه بتاريخ '+fd(P.consent_at)+' · '+ft(P.consent_at)+'</span>':'')+'<ul class="priv">'+PRIV_ITEMS.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul><div class="row">'+btn('إغلاق','closeModal','','sec')+'</div>'})};
+/* تغيير الاسم */
+function nameCard(){if(P.role!=='student'&&P.role!=='teacher')return '';var q=C.nreq,f=R.f,st=q&&q.status==='pending'?'<div class="msg warn">طلبك لتغيير الاسم إلى «'+esc(q.new_name)+'» مستني موافقة مدير المدرسة.</div>':(q&&q.status==='rejected'&&!f.nameSeen?'<span class="hint">آخر طلب لتغيير الاسم لم يُقبل.</span>':'');
+  return '<div class="card"><h3>تغيير الاسم</h3><span class="sub">الاسم الجديد بيتغيّر بعد موافقة مدير المدرسة.</span>'+st+fld('الاسم الجديد','nn',{ph:'اكتب الاسم كاملاً'})+'<div class="row">'+btn('إرسال الطلب','reqName','','sec sm')+'</div></div>'}
+H.reqName=async function(){var f=R.f;f.err='';f.ok='';try{await rpc('request_name_change',{p_name:f.nn||''});f.nn='';C.nreq=await rpc('my_name_request');f.ok='وصل طلبك لمدير المدرسة.'}catch(e){f.err=emsg(e)}draw()};
+function nameReqHtml(){var l=C.nrq||[];if(!l.length)return '';return '<div class="card"><h3 class="hd">'+HI('user')+'طلبات تغيير الاسم ('+n(l.length)+')</h3>'+l.map(function(r){return '<div class="row" style="justify-content:space-between;align-items:flex-start"><span><b>'+esc(r.old_name)+'</b> ← <b>'+esc(r.new_name)+'</b> <span class="sub" dir="ltr">'+esc(r.code||'')+' · '+(r.kind==='teacher'?'مدرس':'طالب')+'</span></span><span class="row">'+btn('قبول','nameYes',{id:r.id},'sm')+btn('رفض','nameNo',{id:r.id},'sec sm')+'</span></div>'}).join('')+'</div>'}
+async function decideName(id,ok){try{await rpc('admin_decide_name',{p_id:+id,p_ok:ok});C.nrq=(C.nrq||[]).filter(function(x){return String(x.id)!==String(id)});if(ok)await refreshAd()}catch(e){R.f.err=emsg(e)}draw()}
+H.nameYes=function(ds){decideName(ds.id,true)};H.nameNo=function(ds){decideName(ds.id,false)};
+/* Web Push */
+var PUSH={ok:false,on:false,key:null,busy:false};
+function b64u(s){var p='='.repeat((4-s.length%4)%4),r=atob((s+p).replace(/-/g,'+').replace(/_/g,'/')),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
+async function pushInit(){PUSH.ok=!!(navigator.serviceWorker&&window.PushManager&&window.Notification&&/^https:/.test(location.protocol));if(!PUSH.ok)return;
+  try{var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();PUSH.on=!!s&&Notification.permission==='granted';var k=await rpc('push_public_key');PUSH.key=(typeof k==='string'&&k)?k:null}catch(e){}
+  if(R.v==='profile')draw()}
+H.pushOn=async function(){var f=R.f;f.err='';f.ok='';PUSH.busy=true;draw();
+  try{if(!PUSH.key)throw new Error('التنبيهات اللحظية لسه مش مفعّلة من إدارة النظام.');
+    var perm=await Notification.requestPermission();if(perm!=='granted')throw new Error('لازم توافق على إذن الإشعارات من المتصفح.');
+    var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(PUSH.key)}),j=s.toJSON();
+    await rpc('save_push',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth});PUSH.on=true;f.ok='اتفعّلت تنبيهات الجهاز.'}
+  catch(e){f.err=emsg(e)}PUSH.busy=false;draw()};
+async function pushDrop(){try{if(!PUSH.ok||!navigator.serviceWorker)return;var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();if(s){var ep=s.endpoint;try{await Promise.race([rpc('drop_push',{p_endpoint:ep}),new Promise(function(_,rj){setTimeout(rj,2500)})])}catch(e){}await s.unsubscribe()}PUSH.on=false}catch(e){}}
+H.pushOff=async function(){var f=R.f;PUSH.busy=true;draw();await pushDrop();PUSH.busy=false;f.ok='اتقفلت تنبيهات الجهاز.';draw()};
+function pushRow(){if(!PUSH.ok)return '<span class="hint">التنبيهات اللحظية غير مدعومة في هذا المتصفح (جرّب Chrome على التابلت بعد تثبيت التطبيق).</span>';
+  if(Notification.permission==='denied')return '<span class="hint">التنبيهات مقفولة من إعدادات المتصفح.</span>';
+  return PUSH.on?bdg('التنبيهات اللحظية مفعّلة','ok')+btn('إيقاف','pushOff','','sec sm',PUSH.busy):btn(PUSH.busy?'جارٍ التفعيل…':'تفعيل التنبيهات اللحظية','pushOn','','sec sm',PUSH.busy)}
+
 var VIEWS={profile:vProfile,tToday:vTToday,tPreview:vTPreview,login:vLogin,sHome:vSHome,sSubject:vSSubject,sExam:vSExam,sResult:vSResult,sMistakes:vSMistakes,sGrades:vSGrades,notes:vNotes,tHome:vTHome,tClass:vTClass,tGrading:vTGrading,tResults:vTResults,mList:vMList,mEdit:vMEdit,gSch:vGSch,gEd:vGEd,gSub:vGSub,aOver:vAOver,aStu:vAStu,aTea:vATea,aCls:vACls,aYear:vAYear,gDash:vGDash};
 function draw(){
   var h;
@@ -863,6 +932,8 @@ function draw(){
   try{
     if(R.v==='login')h=vLogin();
     else if(!P)h=loading();
+    else if(GATE==='privacy')h=vPrivacy();
+    else if(GATE==='tour')h=vTour();
     else if(['student','teacher','school_admin','ministry_editor','ministry_manager'].indexOf(P.role)<0)h=vOther();
     else h=shell(LOADERR?failed():(R.loading?loading():VIEWS[R.v]()));
   }catch(e){h='<div class="msg bad">حدث خطأ في عرض الصفحة: '+esc(e.message)+'</div>'}
@@ -904,9 +975,9 @@ var LOAD={
         C.me.meta.kind=cp.kind;C.me.meta.week=Math.min(40,w);C.me.qs=cp.questions.map(function(q){return {type:q.type,body:q.body,dir:q.dir,image:q.image||'',points:Number(q.points),model:q.model||'',options:(q.options||[]).map(function(o){return {body:o.body,correct:!!o.correct}})}});C.me.dirty=true;R.mcopy=null;lsSet(mKey(),{meta:C.me.meta,qs:C.me.qs});return}
       var dr2=lsGet(mKey());if(dr2&&dr2.qs){C.me.meta=dr2.meta;C.me.qs=dr2.qs;C.me.dirty=true;C.me.restored=true}}},
   gSch:refreshMg,gEd:refreshMg,gSub:refreshMg,gDash:async function(){C.dash=await rpc('m_dashboard');syncClock(C.dash.server_now);C.term=await rpc('get_term');if(R.f.term==null)R.f.term=C.term||''},
-  aOver:async function(){await refreshAd();try{C.rep=await rpc('admin_reports')}catch(e){C.rep=[]}},aYear:async function(){await refreshAd();var y=R.y=R.y||{rep:null,backed:false,stay:[],done:null};R.f.yn=R.f.yn||{};C.ad.classes.forEach(function(c){if(R.f.yn[c.id]==null)R.f.yn[c.id]=nextName(c.name,c.grade_id)})},aStu:refreshAd,aTea:refreshAd,aCls:refreshAd,
+  aOver:async function(){await refreshAd();try{C.rep=await rpc('admin_reports')}catch(e){C.rep=[]}try{C.nrq=await rpc('admin_name_requests')}catch(e){C.nrq=[]}},aYear:async function(){await refreshAd();var y=R.y=R.y||{rep:null,backed:false,stay:[],done:null};R.f.yn=R.f.yn||{};C.ad.classes.forEach(function(c){if(R.f.yn[c.id]==null)R.f.yn[c.id]=nextName(c.name,c.grade_id)})},aStu:refreshAd,aTea:refreshAd,aCls:refreshAd,
   tHome:async function(){C.cls=await rpcC('teacher_classes',0,10*MIN)},
-  profile:async function(){if(P&&P.role==='teacher')C.cls=await rpcC('teacher_classes',0,10*MIN)},
+  profile:async function(){if(P&&P.role==='teacher')C.cls=await rpcC('teacher_classes',0,10*MIN);if(P&&(P.role==='student'||P.role==='teacher')){try{C.nreq=await rpc('my_name_request');var np2=await rpc('my_profile');if(np2&&np2.id)P=np2}catch(e){}}},
   tToday:async function(){C.cls=await rpcC('teacher_classes',0,10*MIN);C.today=await rpcC('teacher_today',0,0)},
   tPreview:async function(){C.tpv=await rpc('teacher_preview',{p_aid:R.aid})},
   tClass:async function(){if(!C.cls)C.cls=await rpcC('teacher_classes',0,10*MIN);C.tas=await rpcC('teacher_assessments',{p_class:R.c,p_subject:R.sj},0)},
@@ -937,7 +1008,7 @@ async function afterLogin(){
   P=await rpcC('my_profile',0,0);
   if(!P){throw new Error('الحساب غير مُعد في النظام. تواصل مع الإدارة.')}
   try{REF=await rpcC('ref_data',0,30*MIN)}catch(e){}
-  C.queue=lsGet('subq:'+P.id)||[];
+  C.queue=lsGet('subq:'+P.id)||[];GATE=gateFor();TSTEP=0;pushInit();
   var rs=P.role==='student'?lsGet('trial-resume:'+P.id):null;
   if(rs&&lsGet(examKey(rs.a)))await go('sExam',{a:rs.a});
   else await go(P.role==='student'?'sHome':(P.role==='teacher'?'tToday':(P.role==='school_admin'?'aOver':(P.role==='ministry_editor'||P.role==='ministry_manager'?'mList':'other'))));
@@ -1287,6 +1358,8 @@ document.addEventListener('click',function(e){
 document.addEventListener('submit',function(e){var fm=e.target.closest('[data-submit]');if(!fm)return;e.preventDefault();H[fm.dataset.submit]()});
 function bind(e,ch){
   var el=e.target,ds=el.dataset;
+  if(ds.bind==='npw'){var pm=document.getElementById('pwm');if(pm){var sc=pwScore(el.value);pm.dataset.s=sc;pm.querySelector('.lb').textContent=sc?'قوة كلمة المرور: '+PW_LBL[sc]:''}}
+  if(ds.chg==='privok'){R.f.privok=el.checked;draw();return}
   if(ds.srch){R.f.q=el.value;var ps=el.selectionStart;draw();var e2=document.getElementById('f_q');if(e2){e2.focus();try{e2.setSelectionRange(ps,ps)}catch(x){}}return}
   if(ds.chg==='asg'){var ar0=R.asg.cls,id0=+ds.id,ii0=ar0.indexOf(id0);if(el.checked&&ii0<0)ar0.push(id0);if(!el.checked&&ii0>-1)ar0.splice(ii0,1);return}
   if(ds.chg==='ans'){var ex=C.ex;if(ex){ex.ans[+ds.q]=+el.value;saveEx(ex);updExam()}return}
