@@ -915,7 +915,10 @@ async function pushInit(){PUSH.ok=!!(navigator.serviceWorker&&window.PushManager
 H.pushOn=async function(){var f=R.f;f.err='';f.ok='';PUSH.busy=true;draw();
   try{if(!PUSH.key)throw new Error('التنبيهات اللحظية لسه مش مفعّلة من إدارة النظام.');
     var perm=await Notification.requestPermission();if(perm!=='granted')throw new Error('لازم توافق على إذن الإشعارات من المتصفح.');
-    var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(PUSH.key)}),j=s.toJSON();
+    var reg=await navigator.serviceWorker.ready,key=b64u(PUSH.key),s=await reg.pushManager.getSubscription();
+    if(s&&s.options&&s.options.applicationServerKey){var ok0=new Uint8Array(s.options.applicationServerKey);if(ok0.length!==key.length||ok0.some(function(v,i){return v!==key[i]})){await s.unsubscribe();s=null}}
+    if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
+    var j=s.toJSON();
     await rpc('save_push',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth});PUSH.on=true;f.ok='اتفعّلت تنبيهات الجهاز.'}
   catch(e){f.err=emsg(e)}PUSH.busy=false;draw()};
 async function pushDrop(){try{if(!PUSH.ok||!navigator.serviceWorker)return;var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();if(s){var ep=s.endpoint;try{await Promise.race([rpc('drop_push',{p_endpoint:ep}),new Promise(function(_,rj){setTimeout(rj,2500)})])}catch(e){}await s.unsubscribe()}PUSH.on=false}catch(e){}}
