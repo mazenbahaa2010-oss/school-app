@@ -240,6 +240,27 @@ h3.hd .hi{width:34px;height:34px;border-radius:10px}
  .bn .badge{position:absolute;top:2px;inset-inline-end:calc(50% - 22px)}
 }
 @media (max-width:640px){.who .pbell .badge{inset-inline-start:auto;width:auto;height:16px;min-width:16px;line-height:16px;padding:0 4px;font-size:10px;text-align:center;border-radius:8px}}
+/* v16: شارات الحالة الموحدة */
+.badge.open{background:var(--ok);color:var(--okt)}.badge.wait{background:var(--chip);color:var(--mut)}.badge.attn{background:var(--warn);color:var(--warnt)}
+.badge.done{background:var(--i1b);color:var(--i1f)}.badge.draft{background:var(--i3b);color:var(--i3f)}
+.badge.open::before,.badge.wait::before,.badge.attn::before,.badge.done::before,.badge.draft::before,.badge.bad::before{margin-inline-end:6px;font-weight:800}
+.badge.open::before{content:"●"}.badge.wait::before{content:"○"}.badge.attn::before{content:"!"}.badge.done::before{content:"✓"}.badge.draft::before{content:"✎"}.badge.bad::before{content:"✕"}
+/* لون المادة */
+.sdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:8px;vertical-align:baseline}
+.sb0{background:var(--i0f)}.sb1{background:var(--i1f)}.sb2{background:var(--i2f)}.sb3{background:var(--i3f)}.sb4{background:var(--i4f)}.sb5{background:var(--i5f)}
+.sbl{border-inline-start:5px solid var(--bd)}.sbl0{border-inline-start-color:var(--i0f)}.sbl1{border-inline-start-color:var(--i1f)}.sbl2{border-inline-start-color:var(--i2f)}.sbl3{border-inline-start-color:var(--i3f)}.sbl4{border-inline-start-color:var(--i4f)}.sbl5{border-inline-start-color:var(--i5f)}
+/* أيقونات تبويبات الهيدر (التابلت) */
+.nvi{display:inline-flex;vertical-align:middle;margin-inline-end:6px}.nvi svg{width:18px;height:18px}
+@media (max-width:640px){.nvi{display:none}}
+/* حركات خفيفة */
+@media (prefers-reduced-motion:no-preference){
+ .btn,.nv,.bn,.card{transition:background-color .15s,color .15s,box-shadow .2s,transform .12s}
+ .btn:active,.bn:active{transform:scale(.97)}
+ .toast{animation:tin .22s ease-out}
+ @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+ .badge.open::before{animation:pulse 2s ease-in-out infinite}
+ @keyframes pulse{50%{opacity:.35}}
+}
 </style></head><body>
 <div id="app"></div><div id="modal"></div>
 <script>window.TRIAL_CFG={url:"https://tcftictbslobminfeuww.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjZnRpY3Ric2xvYm1pbmZldXd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MzYyOTMsImV4cCI6MjExMDExMjI5M30.dBGxPb7scgEjRGZ2zztMqPSzzIZoKwC6C--EjdTqn98"};</script>
@@ -394,7 +415,7 @@ function qReview(q,who){
   if(q.type==='essay'){var mine=q.text&&String(q.text).trim();
     return '<div class="sub">'+(who==='s'?'إجابتك:':'إجابة الطالب:')+'</div><div dir="'+(q.dir==='ltr'?'ltr':'rtl')+'">'+(mine?esc(q.text):'<span class="sub">لم يُكتب شيء</span>')+'</div>'+(q.model?'<div class="model"><b>نموذج الإجابة:</b> '+esc(q.model)+'</div>':'')}
   return (who==='t'?'<div class="sub">'+(q.type==='multi'?'اختيارات الطالب: الأخضر صحيح، والأحمر خطأ، والأصفر صحيحة لم يخترها.':'اختيار الطالب:')+'</div>':'')+optReview(q,who)}
-function scoreBadge(q){if(q.points_got==null)return bdg('بانتظار تصحيح المدرس','warn');return bdg('درجتك: '+fmtN(q.points_got)+' من '+fmtN(q.points),Number(q.points_got)>=Number(q.points)?'ok':'warn')+(q.edited?' '+bdg('عدّل المدرس هذه الدرجة','pri'):'')}
+function scoreBadge(q){if(q.points_got==null)return bdg('بانتظار تصحيح المدرس','attn');return bdg('درجتك: '+fmtN(q.points_got)+' من '+fmtN(q.points),Number(q.points_got)>=Number(q.points)?'ok':'warn')+(q.edited?' '+bdg('عدّل المدرس هذه الدرجة','pri'):'')}
 
 /* ---------- الوضع النهاري / الليلي ---------- */
 function themeEff(){var t=lsGet('trial-theme');if(t==='light'||t==='dark')return t;return (window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}
@@ -417,13 +438,14 @@ function navFor(){
 var NAVIC={"sHome": "<path d=\"M4 19V5l8 3 8-3v14l-8-3z\"/><path d=\"M12 8v11\"/>", "sMistakes": "<path d=\"M12 3l10 18H2z\"/><path d=\"M12 10v5M12 18v.5\"/>", "sGrades": "<path d=\"M5 20V12M12 20V5M19 20v-6\"/>", "mList": "<path d=\"M6 3h8l5 5v13H6z\"/><path d=\"M14 3v5h5\"/>", "gDash": "<path d=\"M4 4v16h16\"/><path d=\"M8 15l4-5 3 3 4-6\"/>", "gSch": "<path d=\"M3 10l9-6 9 6v10H3z\"/><path d=\"M9 20v-6h6v6\"/>", "gEd": "<circle cx=\"9\" cy=\"8\" r=\"3.5\"/><path d=\"M2.5 20c.5-4 3-6 6.5-6s6 2 6.5 6\"/><path d=\"M16 5a3.5 3.5 0 010 7M19 20c-.3-2.5-1.5-4.3-3.5-5\"/>", "gSub": "<path d=\"M4 5a2 2 0 012-2h13v17H6a2 2 0 00-2 2z\"/><path d=\"M4 19V5\"/>", "aOver": "<path d=\"M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z\"/>", "aStu": "<circle cx=\"9\" cy=\"8\" r=\"3.5\"/><path d=\"M2.5 20c.5-4 3-6 6.5-6s6 2 6.5 6\"/><path d=\"M16 5a3.5 3.5 0 010 7M19 20c-.3-2.5-1.5-4.3-3.5-5\"/>", "aTea": "<path d=\"M4 20l4-1 11-11-3-3L5 16z\"/>", "aCls": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "aYear": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M3 10h18M8 3v4M16 3v4\"/>", "tToday": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M3 10h18M8 3v4M16 3v4\"/>", "tHome": "<circle cx=\"9\" cy=\"8\" r=\"3.5\"/><path d=\"M2.5 20c.5-4 3-6 6.5-6s6 2 6.5 6\"/><path d=\"M16 5a3.5 3.5 0 010 7M19 20c-.3-2.5-1.5-4.3-3.5-5\"/>", "tGrading": "<path d=\"M4 20l4-1 11-11-3-3L5 16z\"/>", "tResults": "<path d=\"M4 4v16h16\"/><path d=\"M8 15l4-5 3 3 4-6\"/>"};
 var NAVSHORT={mList:'المحتوى',gDash:'المتابعة',aYear:'السنة'};
 function bnavHtml(nav){return '<nav class="bnav" aria-label="التنقل">'+nav.filter(function(x){return x[0]!=='notes'}).map(function(x){var b=badgeFor(x[0]),on=R.v===x[0]||(x[2]&&x[2].indexOf(R.v)>-1);return '<button type="button" class="bn'+(on?' on':'')+'" data-act="go" data-v="'+x[0]+'"'+(on?' aria-current="page"':'')+'>'+SV(NAVIC[x[0]]||'')+'<span>'+(NAVSHORT[x[0]]||x[1])+'</span><span class="badge warn" data-bd="'+x[0]+'"'+(b?'':' hidden')+'>'+b+'</span></button>'}).join('')+'</nav>'}
+function HIN(v){return '<span class="hi" aria-hidden="true">'+SV(NAVIC[v]||'')+'</span>'}
 function badgeFor(v){var x=v==='notes'?C.unread:(v==='tGrading'?C.pendN:0);return x?n(x):''}
 var TOAST=null,TT=null;
 function toastHtml(){return TOAST?'<div class="toast" role="status"><span>'+esc(TOAST.msg)+'</span>'+(TOAST.undo?'<button type="button" class="lnk" data-act="undo">تراجع</button>':'')+'</div>':''}
 function toast(msg,undo){TOAST={msg:msg,undo:undo||null};clearTimeout(TT);TT=setTimeout(function(){TOAST=null;draw()},8000);draw()}
 function shell(inner){
   var nav=navFor(),q=C.queue.length;
-  return '<header class="top"><div class="brand">'+logoSvg(38)+'<b>'+BRAND+'</b></div><nav>'+nav.map(function(x){var b=badgeFor(x[0]);if(x[0]==='notes')return '<button type="button" class="nv bell'+(R.v==='notes'?' on':'')+'" data-act="go" data-v="notes" aria-label="الإشعارات" title="الإشعارات">'+SIC.bell+'<span class="badge warn" data-bd="notes"'+(b?'':' hidden')+'>'+b+'</span></button>';return '<button type="button" class="nv'+(R.v===x[0]||(x[2]&&x[2].indexOf(R.v)>-1)?' on':'')+'" data-act="go" data-v="'+x[0]+'">'+x[1]+' <span class="badge warn" data-bd="'+x[0]+'"'+(b?'':' hidden')+'>'+b+'</span></button>'}).join('')+'</nav><div class="who">'+('<button type="button" class="nv" data-act="lang" lang="'+(EL==='en'?'ar':'en')+'" aria-label="'+(EL==='en'?'تغيير اللغة إلى العربية':'Change language to English')+'" data-notr="1">'+(EL==='en'?'ع':'EN')+'</button>')+netB()+(q?bdg('بانتظار رفع '+n(q),'warn'):'')+(nav.some(function(x){return x[0]==='notes'})?'<button type="button" class="nv bell pbell'+(R.v==='notes'?' on':'')+'" data-act="go" data-v="notes" aria-label="الإشعارات" title="الإشعارات">'+SIC.bell+'<span class="badge warn" data-bd="notes"'+(C.unread?'':' hidden')+'>'+(C.unread?n(C.unread):'')+'</span></button>':'')+'<button type="button" class="av" data-act="go" data-v="profile" aria-label="حسابي" title="حسابي">'+esc(ini(P.name))+'</button></div></header><main class="wrap'+(ENTER?' enter':'')+'">'+banners()+toastHtml()+inner+'</main>'+bnavHtml(nav)}
+  return '<header class="top"><div class="brand">'+logoSvg(38)+'<b>'+BRAND+'</b></div><nav>'+nav.map(function(x){var b=badgeFor(x[0]);if(x[0]==='notes')return '<button type="button" class="nv bell'+(R.v==='notes'?' on':'')+'" data-act="go" data-v="notes" aria-label="الإشعارات" title="الإشعارات">'+SIC.bell+'<span class="badge warn" data-bd="notes"'+(b?'':' hidden')+'>'+b+'</span></button>';return '<button type="button" class="nv'+(R.v===x[0]||(x[2]&&x[2].indexOf(R.v)>-1)?' on':'')+'" data-act="go" data-v="'+x[0]+'"'+(R.v===x[0]||(x[2]&&x[2].indexOf(R.v)>-1)?' aria-current="page"':'')+'><span class="nvi" aria-hidden="true">'+SV(NAVIC[x[0]]||'')+'</span>'+x[1]+' <span class="badge warn" data-bd="'+x[0]+'"'+(b?'':' hidden')+'>'+b+'</span></button>'}).join('')+'</nav><div class="who">'+('<button type="button" class="nv" data-act="lang" lang="'+(EL==='en'?'ar':'en')+'" aria-label="'+(EL==='en'?'تغيير اللغة إلى العربية':'Change language to English')+'" data-notr="1">'+(EL==='en'?'ع':'EN')+'</button>')+netB()+(q?bdg('بانتظار رفع '+n(q),'warn'):'')+(nav.some(function(x){return x[0]==='notes'})?'<button type="button" class="nv bell pbell'+(R.v==='notes'?' on':'')+'" data-act="go" data-v="notes" aria-label="الإشعارات" title="الإشعارات">'+SIC.bell+'<span class="badge warn" data-bd="notes"'+(C.unread?'':' hidden')+'>'+(C.unread?n(C.unread):'')+'</span></button>':'')+'<button type="button" class="av" data-act="go" data-v="profile" aria-label="حسابي" title="حسابي">'+esc(ini(P.name))+'</button></div></header><main class="wrap'+(ENTER?' enter':'')+'">'+banners()+toastHtml()+inner+'</main>'+bnavHtml(nav)}
 function loading(){return '<div class="sk" style="min-height:44px;max-width:240px"></div><div class="grid"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div><span class="sub" role="status">جارٍ التحميل…</span>'}
 function failed(){return '<div class="empty">'+SIC.inbox+'<b>تعذّر تحميل الصفحة</b><span>اتأكد من النت وجرّب تاني.</span><details class="sub"><summary>التفاصيل</summary>'+esc(LOADERR)+'</details>'+btn('إعادة المحاولة','reload')+'</div>'}
 
@@ -442,25 +464,25 @@ function ovOf(sj,k){return (C.ov||[]).filter(function(a){return a.subject_id==sj
 function todoOf(a){if(a.submitted||!a.released)return false;if(a.kind==='H')return !!a.deadline&&NOW()<Date.parse(a.deadline);return a.open_now}
 function greet(){var h=new Date(NOW()).getHours();return h<12?'صباح الخير':'مساء الخير'}
 function vSHome(){
-  var h='<div class="hello"><span class="g">'+greet()+'</span><h1>أهلاً يا '+esc(P.name.split(' ')[0])+'</h1><span class="sub">'+(P.class?esc(P.class)+' · ':'')+esc(P.school||'')+' · كودك '+esc(P.code)+'</span></div>';
+  var h='<div class="hello"><span class="g">'+greet()+'</span><h1 class="hd">'+HIN('sHome')+'أهلاً يا '+esc(P.name.split(' ')[0])+'</h1><span class="sub">'+(P.class?esc(P.class)+' · ':'')+esc(P.school||'')+' · كودك '+esc(P.code)+'</span></div>';
   if(!C.subs.length)return h+empty('inbox','لم تتم إضافتك إلى فصل بعد','تواصل مع إدارة المدرسة.');
   var live=(C.ov||[]).filter(function(a){return a.released&&!a.submitted&&a.kind!=='H'&&a.open_now});
   var ban=live.length?'<div class="banner" role="status"><div><b>'+esc(sn(live[0].subject_id))+' · '+esc(live[0].title)+' مفتوح الآن</b>'+(live.length>1?'<div class="sub">وفيه '+n(live.length-1)+' كمان مفتوح</div>':'')+'</div>'+btn('ابدأ الآن','exam',{a:live[0].id})+'</div>':'';
   return h+ban+'<div class="grid">'+C.subs.map(function(s){var todo=ovOf(s.subject_id).filter(todoOf).length,lv=live.some(function(a){return a.subject_id==s.subject_id});
-    return '<button type="button" class="subj'+(lv?' live':'')+'" data-act="subject" data-s="'+s.subject_id+'"><span class="ic '+subjCls(s.subject_id)+'">'+subjIcon(s.name,s.subject_id)+'</span><span class="tx"><h3>'+esc(s.name)+'</h3><span class="sub">'+(s.teacher?'أ. '+esc(s.teacher):'')+'</span>'+(lv?bdg('تقييم مفتوح','pri'):(todo?bdg('مطلوب الآن: '+n(todo),'warn'):bdg('لا شيء مطلوب','ok')))+'</span></button>'}).join('')+'</div>'}
+    return '<button type="button" class="subj'+(lv?' live':'')+'" data-act="subject" data-s="'+s.subject_id+'"><span class="ic '+subjCls(s.subject_id)+'">'+subjIcon(s.name,s.subject_id)+'</span><span class="tx"><h3>'+esc(s.name)+'</h3><span class="sub">'+(s.teacher?'أ. '+esc(s.teacher):'')+'</span>'+(lv?bdg('تقييم مفتوح','open'):(todo?bdg('مطلوب الآن: '+n(todo),'attn'):bdg('لا شيء مطلوب','ok')))+'</span></button>'}).join('')+'</div>'}
 function rowA(a){
   var st=bdg(''),act='',lock='';
-  if(!a.released){st=bdg('لم ينزل بعد · ينزل '+fd(a.release_at));lock=' lock'}
+  if(!a.released){st=bdg('لم ينزل بعد · ينزل '+fd(a.release_at),'wait');lock=' lock'}
   else if(a.submitted){
-    if(a.late_pending)st=bdg('سلّمت · ينتظر قرار المدرس في التأخير','warn');
+    if(a.late_pending)st=bdg('سلّمت · ينتظر قرار المدرس في التأخير','attn');
     else if(a.rejected)st=bdg('رُفض التسليم المتأخر','bad');
-    else st=bdg('سلّمت','ok')+(a.answers_visible?(a.score!=null?' '+bdg(fmtN(a.score)+' من '+fmtN(a.max),'pri'):'')+(a.awaiting_teacher?' '+bdg('بانتظار التصحيح','warn'):''):' '+bdg('الدرجة بعد فتح الإجابات'));
+    else st=bdg('سلّمت','done')+(a.answers_visible?(a.score!=null?' '+bdg(fmtN(a.score)+' من '+fmtN(a.max),'pri'):'')+(a.awaiting_teacher?' '+bdg('بانتظار التصحيح','attn'):''):' '+bdg('الدرجة بعد فتح الإجابات','wait'));
     act=btn(a.answers_visible?'الإجابات والدرجة':'عرض','result',{a:a.id},'sec sm');
-    if(queued(a.id))st=bdg('محفوظ على التابلت · يُرفع عند توفر النت','warn')}
-  else if(a.answers_visible){st=bdg('فاتك · الإجابات النموذجية متاحة','warn');act=btn('الإجابات النموذجية','result',{a:a.id},'sec sm')}
-  else if(a.kind==='H'){var dl=Date.parse(a.deadline);if(NOW()<dl){st=bdg('مفتوح · آخر موعد '+fd(dl),'ok');act=btn(a.started?'تابع':'ابدأ','exam',{a:a.id},'sm')}else{st=bdg('انتهى الموعد','bad')}}
-  else if(a.open_now){st=bdg('مفتوح الآن','ok');act=btn(a.started?'تابع':'ابدأ الآن','exam',{a:a.id},'sm')}
-  else{st=bdg('بانتظار فتح المدرس');lock=' lock'}
+    if(queued(a.id))st=bdg('محفوظ على التابلت · يُرفع عند توفر النت','attn')}
+  else if(a.answers_visible){st=bdg('فاتك · الإجابات النموذجية متاحة','attn');act=btn('الإجابات النموذجية','result',{a:a.id},'sec sm')}
+  else if(a.kind==='H'){var dl=Date.parse(a.deadline);if(NOW()<dl){st=bdg('مفتوح · آخر موعد '+fd(dl),'open');act=btn(a.started?'تابع':'ابدأ','exam',{a:a.id},'sm')}else{st=bdg('انتهى الموعد','bad')}}
+  else if(a.open_now){st=bdg('مفتوح الآن','open');act=btn(a.started?'تابع':'ابدأ الآن','exam',{a:a.id},'sm')}
+  else{st=bdg('بانتظار فتح المدرس','wait');lock=' lock'}
   return '<div class="wk'+lock+'"><span class="t">'+esc(a.title)+'</span>'+st+act+'</div>'}
 function vSSubject(){
   var sj=R.s,k=R.tab||'A',list=ovOf(sj,k);
@@ -507,16 +529,16 @@ function vSResult(){
 function vSMistakes(){
   var sj=R.f.sj||'all',all=C.mist||[],list=all.filter(function(m){return sj==='all'||m.assessment.subject_id==sj});
   var subs=[['all','كل المواد']].concat(C.subs.map(function(s){return [s.subject_id,s.name]}));
-  return '<h1>أخطائي</h1><div class="sub">الأسئلة التي لم تأخذ درجتها كاملة في التقييمات التي فُتحت إجاباتها.</div><div class="card">'+sel('المادة','sj',subs,1)+'</div>'+
-    (list.length?list.map(function(m){var q=m.q;return '<div class="q" dir="'+(q.dir==='ltr'?'ltr':'rtl')+'">'+showQ(q,1)+'<span class="sub">'+esc(sn(m.assessment.subject_id))+' · '+esc(m.assessment.title)+'</span>'+qReview(q,'s')+'<div class="row">'+scoreBadge(q)+'</div></div>'}).join(''):empty('check','مفيش أخطاء لمراجعتها دلوقتي','كمّل بنفس المستوى.'))}
+  return '<h1 class="hd">'+HIN('sMistakes')+'أخطائي</h1><div class="sub">الأسئلة التي لم تأخذ درجتها كاملة في التقييمات التي فُتحت إجاباتها.</div><div class="card">'+sel('المادة','sj',subs,1)+'</div>'+
+    (list.length?list.map(function(m){var q=m.q;return '<div class="q sbl sbl'+subjCol(m.assessment.subject_id)+'" dir="'+(q.dir==='ltr'?'ltr':'rtl')+'">'+showQ(q,1)+'<span class="sub">'+esc(sn(m.assessment.subject_id))+' · '+esc(m.assessment.title)+'</span>'+qReview(q,'s')+'<div class="row">'+scoreBadge(q)+'</div></div>'}).join(''):empty('check','مفيش أخطاء لمراجعتها دلوقتي','كمّل بنفس المستوى.'))}
 function vSGrades(){
   var low=null,allok=true,any=false;
   var rows=C.subs.map(function(s){var l=ovOf(s.subject_id).filter(function(a){return a.score!=null}),t=0,m=0;l.forEach(function(a){t+=Number(a.score);m+=Number(a.max)});
     var pc=m?Math.round(t*100/m):null;if(pc!=null){any=true;if(pc<85)allok=false;if(pc<70&&(!low||pc<low.pc))low={name:s.name,pc:pc}}
-    return '<tr><td>'+esc(s.name)+'</td><td>'+n(l.length)+'</td><td>'+(l.length?fmtN(Math.round(t*10)/10)+' من '+fmtN(m):'—')+'</td><td>'+(pc==null?'—':'<div class="pgrow"><div class="bar"><i style="width:'+pc+'%"></i></div><span>'+n(pc)+'٪</span></div>')+'</td></tr>'}).join('');
-  var det=(C.ov||[]).filter(function(a){return a.score!=null}).map(function(a){return '<tr><td>'+esc(sn(a.subject_id))+'</td><td>'+esc(a.title)+'</td><td>'+fmtN(a.score)+' من '+fmtN(a.max)+'</td></tr>'}).join('');
+    return '<tr><td><i class="sdot sb'+subjCol(s.subject_id)+'"></i>'+esc(s.name)+'</td><td>'+n(l.length)+'</td><td>'+(l.length?fmtN(Math.round(t*10)/10)+' من '+fmtN(m):'—')+'</td><td>'+(pc==null?'—':'<div class="pgrow"><div class="bar"><i style="width:'+pc+'%"></i></div><span>'+n(pc)+'٪</span></div>')+'</td></tr>'}).join('');
+  var det=(C.ov||[]).filter(function(a){return a.score!=null}).map(function(a){return '<tr><td><i class="sdot sb'+subjCol(a.subject_id)+'"></i>'+esc(sn(a.subject_id))+'</td><td>'+esc(a.title)+'</td><td>'+fmtN(a.score)+' من '+fmtN(a.max)+'</td></tr>'}).join('');
   var sum=low?'<div class="msg warn">أكتر مادة محتاجة مجهود: <b>'+esc(low.name)+'</b> ('+n(low.pc)+'٪). راجع أخطاءك فيها من صفحة «أخطائي».</div>':(any&&allok?'<div class="msg ok">مستواك كويس في كل المواد، كمّل كده 👏</div>':'');
-  return '<h1>درجاتي</h1>'+sum+'<div class="card"><h3>ملخص المواد</h3><div class="tbl"><table><thead><tr><th>المادة</th><th>عدد ما صُحّح</th><th>المجموع</th><th>النسبة</th></tr></thead><tbody>'+rows+'</tbody></table></div></div><div class="card"><h3>التفاصيل</h3><div class="tbl"><table><thead><tr><th>المادة</th><th>التقييم / الأداء</th><th>الدرجة</th></tr></thead><tbody>'+(det||'<tr><td colspan="3">لا توجد درجات ظاهرة بعد.</td></tr>')+'</tbody></table></div><span class="hint">تظهر الدرجة بعد فتح الإجابات.</span></div>'}
+  return '<h1 class="hd">'+HIN('sGrades')+'درجاتي</h1>'+sum+'<div class="card"><h3>ملخص المواد</h3><div class="tbl"><table><thead><tr><th>المادة</th><th>عدد ما صُحّح</th><th>المجموع</th><th>النسبة</th></tr></thead><tbody>'+rows+'</tbody></table></div></div><div class="card"><h3>التفاصيل</h3><div class="tbl"><table><thead><tr><th>المادة</th><th>التقييم / الأداء</th><th>الدرجة</th></tr></thead><tbody>'+(det||'<tr><td colspan="3">لا توجد درجات ظاهرة بعد.</td></tr>')+'</tbody></table></div><span class="hint">تظهر الدرجة بعد فتح الإجابات.</span></div>'}
 
 
 var ROLE_AR={student:'طالب',teacher:'مدرس',school_admin:'مدير مدرسة',ministry_manager:'مدير الوزارة',ministry_editor:'محرر في الوزارة'};
@@ -527,7 +549,7 @@ function vProfile(){
   var dl=kv('الاسم',esc(P.name))+kv('الكود',P.code?'<span dir="ltr">'+esc(P.code)+'</span>':'')+kv('الدور',ROLE_AR[P.role]||'')+kv('المدرسة',esc(P.school||''))+(P.school?kv('نوع المدرسة',P.school_kind==='languages'?'لغات':'عربي'):'')+(P.role==='student'?kv('السنة الدراسية',GN[P.grade_id]||'')+kv('الفصل',esc(P.class||'—')):'')+ex;
   var np=(window.Notification?(Notification.permission==='granted'?bdg('التنبيهات مفعّلة','ok'):(Notification.permission==='denied'?'<span class="hint">التنبيهات مقفولة من إعدادات المتصفح.</span>':btn('تفعيل تنبيهات الجهاز','askNotif','','sec sm'))):'<span class="hint">التنبيهات غير مدعومة في هذا المتصفح.</span>');
   var rep=(P.role==='student'||P.role==='teacher')?'<div class="card"><h3>في خطأ في بياناتي؟</h3><span class="sub">اكتب الخطأ وهيوصل لمدير المدرسة يصلّحه.</span><label class="fld"><span>وصف الخطأ</span><textarea data-bind="rtxt" placeholder="مثال: اسمي مكتوب غلط، أو سنتي/فصلي غلط" style="min-height:90px">'+esc(f.rtxt||'')+'</textarea></label><div class="row">'+btn('إرسال البلاغ','sendReport')+'</div></div>':'';
-  return '<h1>حسابي</h1>'+okm()+err()+'<div class="card"><div class="pf"><span class="av" aria-hidden="true">'+esc(ini(P.name))+'</span><div><h2>'+esc(P.name)+'</h2><span class="sub">'+(ROLE_AR[P.role]||'')+(P.school?' · '+esc(P.school):'')+'</span></div></div><dl class="kv">'+dl+'</dl></div>'+
+  return '<h1 class="hd">'+HI('user')+'حسابي</h1>'+okm()+err()+'<div class="card"><div class="pf"><span class="av" aria-hidden="true">'+esc(ini(P.name))+'</span><div><h2>'+esc(P.name)+'</h2><span class="sub">'+(ROLE_AR[P.role]||'')+(P.school?' · '+esc(P.school):'')+'</span></div></div><dl class="kv">'+dl+'</dl></div>'+
    '<div class="card"><h3>كلمة المرور</h3><div class="row"><span style="font-size:1.4rem;letter-spacing:4px" aria-label="مخفية">••••••••</span>'+btn('تغيير كلمة المرور','myPw','','sec sm')+'</div><span class="hint">كلمة المرور محفوظة مشفّرة ولا تُعرض لأي حد. لو نسيتها اطلب من مدير المدرسة كلمة جديدة.</span></div>'+
    langCard()+'<div class="card"><h3>المظهر</h3><div><b>الوضع</b>'+seg([['auto','تلقائي'],['light','نهاري'],['dark','ليلي']],th,'setTheme')+'</div><div><b>حجم الخط</b>'+seg([['md','عادي'],['lg','كبير'],['xl','كبير جداً']],fs,'setFs')+'</div></div>'+
    '<div class="card"><h3>التطبيق والإشعارات</h3><div class="row">'+(INST?btn('تثبيت التطبيق','install','','sec sm'):'<span class="hint">للتثبيت: من قائمة Chrome اختر «تثبيت التطبيق».</span>')+np+'</div><div class="row">'+pushRow()+'</div></div>'+
@@ -541,20 +563,20 @@ function repHtml(){var l=C.rep||[];if(!l.length)return '';return '<div class="ca
 H.repDone=async function(ds){try{await rpc('admin_resolve_report',{p_id:+ds.id});C.rep=(C.rep||[]).filter(function(x){return String(x.id)!==String(ds.id)})}catch(e){R.f.err=emsg(e)}draw()};
 
 /* ---------- الإشعارات ---------- */
-function vNotes(){var l=C.notes||[];return '<h1>الإشعارات</h1>'+((window.Notification&&Notification.permission==='default'&&navigator.serviceWorker)?'<div class="row">'+btn('تفعيل تنبيهات الجهاز','askNotif','','sec sm')+'</div>':'')+'<div class="sub">تصلك إشعارات عند فتح المدرس تقييماً أو أداءً لفصلك، وعند فتح نموذج الإجابة'+(P.role==='student'?'، وعند تصحيح درجتك.':'.')+'</div>'+
+function vNotes(){var l=C.notes||[];return '<h1 class="hd"><span class="hi" aria-hidden="true">'+SIC.bell+'</span>الإشعارات</h1>'+((window.Notification&&Notification.permission==='default'&&navigator.serviceWorker)?'<div class="row">'+btn('تفعيل تنبيهات الجهاز','askNotif','','sec sm')+'</div>':'')+'<div class="sub">تصلك إشعارات عند فتح المدرس تقييماً أو أداءً لفصلك، وعند فتح نموذج الإجابة'+(P.role==='student'?'، وعند تصحيح درجتك.':'.')+'</div>'+
   (l.length?l.map(function(x){return '<div class="note'+(x.fresh?' new':'')+'"><b>'+esc(x.body)+'</b><span class="sub">'+fd(x.at)+' · '+ft(x.at)+'</span></div>'}).join(''):empty('inbox','مفيش إشعارات','هتوصلك هنا أول ما المدرس يفتح تقييم.'))}
 
 /* ---------- المدرس ---------- */
 function clsOf(id){return (C.cls||[]).filter(function(c){return c.id==id})[0]}
 function vTHome(){
-  if(!C.cls.length)return '<h1>فصولي</h1><div class="msg warn">لم تُضف إلى أي فصل بعد. تواصل مع إدارة المدرسة.</div>';
-  return '<h1>فصولي</h1><div class="grid">'+C.cls.map(function(c){return (c.subjects||[]).map(function(s){return '<button type="button" class="subj" data-act="tclass" data-c="'+c.id+'" data-s="'+s.id+'"><span class="ic c'+(c.id%6)+'">'+SIC.users+'</span><span class="tx"><h3>'+esc(c.name)+'</h3><span class="sub"><span class="mi cf'+subjCol(s.id)+'">'+subjIcon(s.name,s.id)+'</span> '+esc(s.name)+' · '+n(c.students.length)+' طالب</span></span></button>'}).join('')}).join('')+'</div>'}
+  if(!C.cls.length)return '<h1 class="hd">'+HIN('tHome')+'فصولي</h1><div class="msg warn">لم تُضف إلى أي فصل بعد. تواصل مع إدارة المدرسة.</div>';
+  return '<h1 class="hd">'+HIN('tHome')+'فصولي</h1><div class="grid">'+C.cls.map(function(c){return (c.subjects||[]).map(function(s){return '<button type="button" class="subj" data-act="tclass" data-c="'+c.id+'" data-s="'+s.id+'"><span class="ic c'+(c.id%6)+'">'+SIC.users+'</span><span class="tx"><h3>'+esc(c.name)+'</h3><span class="sub"><span class="mi cf'+subjCol(s.id)+'">'+subjIcon(s.name,s.id)+'</span> '+esc(s.name)+' · '+n(c.students.length)+' طالب</span></span></button>'}).join('')}).join('')+'</div>'}
 
 function vTToday(){
   var t=C.today||{open:[],ready:[]},pend=C.pendN||0;
-  var h='<div class="hello"><span class="g">'+greet()+'</span><h1>أهلاً يا '+esc(P.name.split(' ')[0])+'</h1><span class="sub">'+esc(P.school||'')+'</span></div>';
+  var h='<div class="hello"><span class="g">'+greet()+'</span><h1 class="hd">'+HIN('tToday')+'أهلاً يا '+esc(P.name.split(' ')[0])+'</h1><span class="sub">'+esc(P.school||'')+'</span></div>';
   if(pend)h+='<div class="banner" role="status"><div><b>عندك '+n(pend)+' إجابة مقالية محتاجة تصحيح</b></div>'+btn('ابدأ التصحيح','go',{v:'tGrading'})+'</div>';
-  h+='<div class="card"><h3>مفتوح الآن</h3>'+(t.open.length?t.open.map(function(o){return '<div class="wk"><span class="t">'+esc(o.class)+' · '+esc(sn(o.subject_id))+' · '+esc(o.title)+'</span>'+bdg('سلّم '+n(o.n_done)+' من '+n(o.n_open),'ok')+'<span class="sub">حتى '+ft(o.ends_at)+'</span>'+btn('فتح الفصل','tclass',{c:o.class_id,s:o.subject_id,t:o.kind},'sec sm')+'</div>'}).join(''):empty('clock','مفيش تقييم مفتوح دلوقتي'))+'</div>';
+  h+='<div class="card"><h3>مفتوح الآن</h3>'+(t.open.length?t.open.map(function(o){return '<div class="wk"><span class="t">'+esc(o.class)+' · '+esc(sn(o.subject_id))+' · '+esc(o.title)+'</span>'+bdg('سلّم '+n(o.n_done)+' من '+n(o.n_open),'open')+'<span class="sub">حتى '+ft(o.ends_at)+'</span>'+btn('فتح الفصل','tclass',{c:o.class_id,s:o.subject_id,t:o.kind},'sec sm')+'</div>'}).join(''):empty('clock','مفيش تقييم مفتوح دلوقتي'))+'</div>';
   h+='<div class="card"><h3>جاهز للفتح</h3><span class="sub">اللي نزل في آخر ٧ أيام ولسه ما فتحتوش لفصل.</span>'+(t.ready.length?t.ready.map(function(o){return '<div class="wk"><span class="t">'+esc(o.class)+' · '+esc(sn(o.subject_id))+' · '+esc(o.title)+'</span>'+btn('افتح','tclass',{c:o.class_id,s:o.subject_id,t:o.kind},'sm')+'</div>'}).join(''):empty('check','مفيش حاجة مستنية الفتح'))+'</div>';
   return h+'<div class="row">'+btn('كل فصولي','go',{v:'tHome'},'sec')+'</div>'}
 function pvQs(qs,pa,show){return qs.map(function(q,i){var dr=' dir="'+(q.dir==='ltr'?'ltr':'rtl')+'"',hd=showQ(q,i+1);
@@ -576,10 +598,10 @@ function vTClass(){
   return h}
 function cardTA(a,c,k){
   var h='<div class="card"><div class="row" style="justify-content:space-between"><b>'+esc(a.title)+'</b><span class="row"><span class="sub">سلّم '+n(a.submitted)+' من '+n(c.students.length)+'</span>'+btn('معاينة كطالب','tPrev',{a:a.id},'sec sm')+'</span></div>';
-  if(k==='H'){h+='<div class="row">'+(a.expired?bdg('انتهى الموعد','bad'):bdg('مفتوح حتى '+fd(a.deadline),'ok'))+(a.answers_visible?bdg('الإجابات مفتوحة','pri'):'')+'</div></div>';return h}
+  if(k==='H'){h+='<div class="row">'+(a.expired?bdg('انتهى الموعد','bad'):bdg('مفتوح حتى '+fd(a.deadline),'open'))+(a.answers_visible?bdg('الإجابات مفتوحة','pri'):'')+'</div></div>';return h}
   var o=a.open;
   if(o){var total=Math.round((Date.parse(o.end_at)-Date.parse(o.start_at))/MIN);
-    h+='<div class="row">'+bdg('مفتوح الآن حتى '+ft(o.end_at),'ok')+'<span class="sub">'+n(o.students)+' طالب · المدة '+n(total)+' دقيقة</span></div><div class="row">'+btn('− ٥ دقائق','openMin',{o:o.id,m:total-5},'sec sm',total<=35)+btn('+ ٥ دقائق','openMin',{o:o.id,m:total+5},'sec sm',total>=90)+btn('إغلاق الآن','closeOpen',{o:o.id},'sec sm')+'</div><span class="hint">عند الإغلاق المبكر يكمل من بالداخل حتى مرور ٣٥ دقيقة من البداية.</span>'}
+    h+='<div class="row">'+bdg('مفتوح الآن حتى '+ft(o.end_at),'open')+'<span class="sub">'+n(o.students)+' طالب · المدة '+n(total)+' دقيقة</span></div><div class="row">'+btn('− ٥ دقائق','openMin',{o:o.id,m:total-5},'sec sm',total<=35)+btn('+ ٥ دقائق','openMin',{o:o.id,m:total+5},'sec sm',total>=90)+btn('إغلاق الآن','closeOpen',{o:o.id},'sec sm')+'</div><span class="hint">عند الإغلاق المبكر يكمل من بالداخل حتى مرور ٣٥ دقيقة من البداية.</span>'}
   else if(a.revealed||a.answers_visible)h+='<div class="row">'+bdg(a.revealed?'فُتح نموذج الإجابة للفصل':'الإجابات مفتوحة تلقائياً','pri')+'</div>';
   else{
     if(a.expired)h+='<div class="msg warn">انتهت مهلة الفتح (٧ أيام من النزول).</div>';
@@ -611,34 +633,34 @@ function gval(p){var d=drLoad()[gkey(p)];return d?d.p:gdef(p)}
 function dval(p){var d=drLoad()[gkey(p)];return d?d.p:(p.points_got==null?null:Number(p.points_got))}
 function vTGrading(){
   var ps=C.pend||[];
-  return '<h1>التصحيح</h1><div class="sub">'+(ps.length?n(ps.length)+' إجابة تنتظر درجتك':'')+'</div>'+okm()+err()+(ps.length?ps.map(function(p){
-    return '<div class="card"><div class="row" style="justify-content:space-between"><b>'+esc(p.student)+'</b><span class="sub">'+esc(p.class)+' · '+esc(sn(p.assessment.subject_id))+' · '+esc(p.assessment.title)+'</span></div><div class="sub">'+esc(p.body)+' ('+fmtN(p.points)+' درجة)</div>'+qimg(p.image)+qReview(toQ(p),'t')+'<div class="row">'+stepper('gstep',{k:gkey(p)},gval(p),p.points)+(drLoad()[gkey(p)]?bdg('لم يُعتمد · محفوظ على الجهاز','warn'):btn('تثبيت الدرجة','gfix',{k:gkey(p)},'sec sm'))+'<span class="hint">'+(p.type==='multi'?'اختار الطالب إجابة غير مطابقة: حدد درجته بالسهم ▲ (نصف درجة في كل ضغطة).':'نصف درجة في كل ضغطة.')+'</span></div></div>'}).join(''):'<div class="card"><div class="msg ok">لا توجد إجابات تنتظر تصحيحك.</div></div>')+apprBar(ps)}
+  return '<h1 class="hd">'+HIN('tGrading')+'التصحيح</h1><div class="sub">'+(ps.length?n(ps.length)+' إجابة تنتظر درجتك':'')+'</div>'+okm()+err()+(ps.length?ps.map(function(p){
+    return '<div class="card"><div class="row" style="justify-content:space-between"><b>'+esc(p.student)+'</b><span class="sub">'+esc(p.class)+' · '+esc(sn(p.assessment.subject_id))+' · '+esc(p.assessment.title)+'</span></div><div class="sub">'+esc(p.body)+' ('+fmtN(p.points)+' درجة)</div>'+qimg(p.image)+qReview(toQ(p),'t')+'<div class="row">'+stepper('gstep',{k:gkey(p)},gval(p),p.points)+(drLoad()[gkey(p)]?bdg('لم يُعتمد · محفوظ على الجهاز','attn'):btn('تثبيت الدرجة','gfix',{k:gkey(p)},'sec sm'))+'<span class="hint">'+(p.type==='multi'?'اختار الطالب إجابة غير مطابقة: حدد درجته بالسهم ▲ (نصف درجة في كل ضغطة).':'نصف درجة في كل ضغطة.')+'</span></div></div>'}).join(''):'<div class="card"><div class="msg ok">لا توجد إجابات تنتظر تصحيحك.</div></div>')+apprBar(ps)}
 function apprBar(ps){var dc=drCount(),left=(ps||[]).filter(function(p){return !drLoad()[gkey(p)]}).length;
   if(!dc&&!left)return '';
   return '<div class="dbar" role="region" aria-label="اعتماد النتيجة"><span class="sub">'+(dc?'<b>'+n(dc)+'</b> درجة جاهزة للاعتماد. الطالب مش هيشوف أي درجة إلا بعد الاعتماد، ويوصله إشعار واحد.':'لسه ما ثبّتّ أي درجة.')+(left?'<br>متبقي '+n(left)+' سؤال مقالي لم يُصحح.':'')+'</span>'+btn('اعتمد النتيجة','gApprove','','',!dc||BUSY)+'</div>'}
 function toQ(p){return {type:p.type,body:p.body,dir:p.dir,image:p.image,points:p.points,options:p.options,chosen:p.chosen,text:p.text,correct:p.correct,model:p.model}}
 
 function vTResults(){
-  var cs=C.cls||[];if(!cs.length)return '<h1>النتائج</h1><div class="msg warn">لا توجد فصول.</div>';
+  var cs=C.cls||[];if(!cs.length)return '<h1 class="hd">'+HIN('tResults')+'النتائج</h1><div class="msg warn">لا توجد فصول.</div>';
   var f=R.f,c=clsOf(f.c)||cs[0],sjs=c.subjects||[],tas=C.tas||[],weeks=C.weeks||[];
-  var head='<h1>النتائج</h1><div class="card"><div class="row">'+sel('الفصل','c',cs.map(function(x){return [x.id,x.name]}),1)+sel('المادة','sj',sjs.map(function(s){return [s.id,s.name]}),1)+(weeks.length?sel('الأسبوع','w',weeks.map(function(w){return [w,'الأسبوع '+n(w)]}),1):'')+'</div>';
+  var head='<h1 class="hd">'+HIN('tResults')+'النتائج</h1><div class="card"><div class="row">'+sel('الفصل','c',cs.map(function(x){return [x.id,x.name]}),1)+sel('المادة','sj',sjs.map(function(s){return [s.id,s.name]}),1)+(weeks.length?sel('الأسبوع','w',weeks.map(function(w){return [w,'الأسبوع '+n(w)]}),1):'')+'</div>';
   if(!weeks.length)return head+'<div class="msg warn">لا يوجد شيء نزل لهذه المادة بعد.</div></div>';
   head+='<div class="tabs" role="group" aria-label="نوع النتائج">'+['A','C','H'].map(function(x){return '<button type="button" class="tab'+(f.k===x?' on':'')+'" data-act="rkind" data-t="'+x+'" aria-pressed="'+(f.k===x?'true':'false')+'">'+KN[x]+'</button>'}).join('')+'</div>';
   var a=tas.filter(function(x){return x.week==f.w&&x.kind===f.k})[0];
   if(!a)return head+'<div class="msg warn">لا يوجد '+KN[f.k]+' في الأسبوع '+n(f.w)+'.</div></div>';
   var rows=C.res||[],cn=rows.filter(function(r){return r.counted}),sum=0;cn.forEach(function(r){sum+=Number(r.score||0)});
   var body=rows.map(function(r){var b,sc='—';
-    if(r.status==='none')b=bdg('لم يسلّم','bad');else if(r.status==='solving')b=bdg('يحل الآن','pri');
-    else if(r.late&&!r.late_decision)b=bdg('متأخر','warn')+' '+btn('قبول','late',{s:r.sub_id,v:1},'sm')+' '+btn('رفض','late',{s:r.sub_id,v:0},'sec sm');
+    if(r.status==='none')b=bdg('لم يسلّم','bad');else if(r.status==='solving')b=bdg('يحل الآن','open');
+    else if(r.late&&!r.late_decision)b=bdg('متأخر','attn')+' '+btn('قبول','late',{s:r.sub_id,v:1},'sm')+' '+btn('رفض','late',{s:r.sub_id,v:0},'sec sm');
     else if(r.late_decision==='rejected')b=bdg('رُفض (متأخر)','bad');
-    else{b=bdg('سلّم','ok')+(r.late?' '+bdg('متأخر · مقبول','pri'):'');sc=fmtN(r.score)+' من '+fmtN(r.max)+(r.awaiting_teacher?' '+bdg('بانتظار التصحيح','warn'):'')}
+    else{b=bdg('سلّم','done')+(r.late?' '+bdg('متأخر · مقبول','done'):'');sc=fmtN(r.score)+' من '+fmtN(r.max)+(r.awaiting_teacher?' '+bdg('بانتظار التصحيح','attn'):'')}
     return '<tr><td>'+esc(r.name)+'</td><td>'+b+'</td><td>'+sc+'</td><td>'+(r.sub_id&&r.status==='submitted'?btn('تفاصيل / تعديل','detail',{s:r.sub_id},'sec sm'):'')+'</td></tr>'}).join('');
   return head+'</div><div class="row"><div class="stat"><span class="sub">سلّموا</span><b>'+n(cn.length)+'/'+n(rows.length)+'</b></div><div class="stat"><span class="sub">متوسط الدرجات</span><b>'+(cn.length?fmtN(Math.round(sum/cn.length*10)/10):'—')+'</b></div>'+btn('تصدير PDF','pdf','','sec')+btn('تقرير الفصل كامل','classRep','','sec')+'</div><div class="card"><div class="tbl"><table><thead><tr><th>الطالب</th><th>الحالة</th><th>الدرجة</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div></div>'}
 
 function detailHtml(){
   var dt=C.dt;
   return '<h2>'+esc(dt.items[0]?dt.items[0].student:'')+' · '+esc(dt.items[0]?dt.items[0].assessment.title:'')+'</h2>'+(dt.late?'<div class="msg warn">تسليم متأخر '+(dt.late_decision==='accepted'?'· مقبول':dt.late_decision==='rejected'?'· مرفوض':'· ينتظر قرارك')+'</div>':'')+dt.items.map(function(p,i){
-    return '<div class="q" dir="'+(p.dir==='ltr'?'ltr':'rtl')+'">'+showQ(p,i+1)+qReview(toQ(p),'t')+'<div class="row">'+stepper('dstep',{k:gkey(p)},dval(p),p.points)+(drLoad()[gkey(p)]?bdg('لم يُعتمد','warn'):(p.edited?bdg('عُدّلت','pri'):''))+'</div></div>'}).join('')+(drCount(C.dsub)?'<div class="msg warn">فيه '+n(drCount(C.dsub))+' تعديل لم يُعتمد. الطالب لسه شايف الدرجة القديمة.</div>':'')+'<div class="row">'+btn('اعتمد التعديلات','gApprove',{sub:C.dsub},'',!drCount(C.dsub)||BUSY)+btn('إغلاق','closeModal','','sec')+'</div>'}
+    return '<div class="q" dir="'+(p.dir==='ltr'?'ltr':'rtl')+'">'+showQ(p,i+1)+qReview(toQ(p),'t')+'<div class="row">'+stepper('dstep',{k:gkey(p)},dval(p),p.points)+(drLoad()[gkey(p)]?bdg('لم يُعتمد','attn'):(p.edited?bdg('عُدّلت','done'):''))+'</div></div>'}).join('')+(drCount(C.dsub)?'<div class="msg warn">فيه '+n(drCount(C.dsub))+' تعديل لم يُعتمد. الطالب لسه شايف الدرجة القديمة.</div>':'')+'<div class="row">'+btn('اعتمد التعديلات','gApprove',{sub:C.dsub},'',!drCount(C.dsub)||BUSY)+btn('إغلاق','closeModal','','sec')+'</div>'}
 
 
 /* ---------- إدارة المدرسة ---------- */
@@ -745,7 +767,7 @@ function vAOver(){
 function vAStu(){
   var a=C.ad,f=R.f,g=+f.g||1,cl=a.classes.filter(function(c){return c.grade_id===g});
   var form='<div class="card"><h3 class="hd">'+HI('cap')+'إضافة طلاب</h3><div class="row"><label class="fld"><span>السنة الدراسية</span><select data-bind="g" data-dr="1">'+gOpts().map(function(x){return '<option value="'+x[0]+'"'+(g===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label>'+sel('الفصل (اختياري)','cl',[['','بدون فصل الآن']].concat(cl.map(function(c){return [c.id,c.name]})))+'</div>'+ta('أسماء الطلاب (اسم في كل سطر)','names','أحمد محمود\nمنى علي | 123456')+'<span class="hint">لكل طالب كود وكلمة مرور تتولد تلقائياً وتظهر في ورقة للطباعة. لو عايز كلمة مرور بنفسك اكتبها بعد علامة | مثل: أحمد محمود | 123456 (٦ أحرف على الأقل). الحد الأقصى ٦٠ اسماً في المرة.</span>'+btn(R.busy?'جارٍ الإنشاء…':'إنشاء الحسابات','addStu','','',R.busy)+'</div>';
-  var rows=a.students.filter(function(s){return hasQ(s.name+' '+s.code)}).map(function(s,i){return '<tr><td>'+n(i+1)+'</td><td>'+esc(s.name)+'</td><td dir="ltr" style="text-align:start">'+esc(s.code)+'</td><td>'+GN[s.grade_id]+'</td><td>'+(s.class?esc(s.class):bdg('بدون فصل','warn'))+'</td><td>'+accActs(s)+'</td></tr>'}).join('');
+  var rows=a.students.filter(function(s){return hasQ(s.name+' '+s.code)}).map(function(s,i){return '<tr><td>'+n(i+1)+'</td><td>'+esc(s.name)+'</td><td dir="ltr" style="text-align:start">'+esc(s.code)+'</td><td>'+GN[s.grade_id]+'</td><td>'+(s.class?esc(s.class):bdg('بدون فصل','attn'))+'</td><td>'+accActs(s)+'</td></tr>'}).join('');
   return '<h1 class="hd">'+HI('cap')+'الطلاب</h1>'+okm()+err()+form+'<div class="card"><h3 class="hd">'+HI('cap')+'كل الطلاب ('+n(a.students.length)+')</h3>'+srchBox('ابحث بالاسم أو الكود')+'<div class="tbl"><table><thead><tr><th>م</th><th>الاسم</th><th>الكود</th><th>السنة</th><th>الفصل</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="6">لا يوجد طلاب بعد.</td></tr>')+'</tbody></table></div></div>'}
 function vATea(){
   var a=C.ad,f=R.f,subs=f.subs||[];
@@ -866,7 +888,7 @@ function vMList(){
   if(!f.s)return head+'<div class="msg warn">لا توجد مواد.</div>';
   list=list.filter(function(a){return hasQ(KN[a.kind]+' الأسبوع '+a.week+' '+(a.status==='draft'?'مسودة':(a.locked?'نزل':'منشور')))});
   return head+(list.length?list.map(function(a){
-    var st=a.status==='draft'?bdg('مسودة','warn'):(a.locked?bdg('نزل','ok'):bdg('منشور · ينزل '+fd(a.release_at)+' '+ft(a.release_at),'pri'));
+    var st=a.status==='draft'?bdg('مسودة','draft'):(a.locked?bdg('نزل','done'):bdg('منشور · ينزل '+fd(a.release_at)+' '+ft(a.release_at),'wait'));
     return '<div class="card"><div class="row" style="justify-content:space-between"><b>'+KN[a.kind]+' · الأسبوع '+n(a.week)+'</b><span class="row">'+st+'<span class="sub">'+n(a.qn)+' سؤال · '+fmtN(Number(a.pts))+' درجة</span></span></div><div class="row">'+btn(a.locked?'عرض':'تعديل','mOpen',{id:a.id},'sec sm')+btn('نسخ','mCopy',{id:a.id},'sec sm')+(a.status==='draft'?(R.mdel===a.id?'<span class="sub">سيُحذف نهائياً. متأكد؟</span> '+btn('نعم، احذف','mDelYes',{id:a.id},'sm')+' '+btn('إلغاء','mDelNo','','sec sm'):btn('حذف','mDelAsk',{id:a.id},'sec sm')):'')+'</div></div>'}).join(''):'<div class="msg">لا يوجد شيء لهذه السنة والمادة. اضغط «إضافة جديد».</div>')}
 function mQHtml(q,i,ro){
   var dis=ro?' disabled':'',m=C.me,last=i===m.qs.length-1;
@@ -885,7 +907,7 @@ function vMEdit(){
   var top='<div class="row"><button type="button" class="lnk" data-act="mBack">← القائمة</button>'+btn('معاينة كطالب','mPv','','sec sm')+(m.id&&!m.dirty?btn('نسخ لأسبوع آخر','mCopy',{id:m.id},'sec sm'):'')+'</div><div><h1>'+(m.id?'تعديل':'إضافة')+' '+KN[m.meta.kind]+' · الأسبوع '+n(m.meta.week)+'</h1><span class="sub">'+(m.status==='draft'?'مسودة':(m.locked?'نزل ولا يمكن تعديله':'منشور ولم ينزل بعد (ما زال يمكن تعديله)'))+'</span></div>'+(m.restored?'<div class="msg warn">تم استرجاع تعديلات غير محفوظة من هذا الجهاز. '+btn('تجاهلها','mDiscard','','sec sm')+'</div>':'')+okm()+err();
   var hd='<div class="card"><div class="row"><label class="fld"><span>السنة الدراسية</span><select data-mf="grade_id"'+dis+'>'+gOpts().map(function(x){return '<option value="'+x[0]+'"'+(+m.meta.grade_id===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label><label class="fld"><span>المادة</span><select data-mf="subject_id"'+dis+'>'+subsFor(m.meta.grade_id).concat(subsFor(m.meta.grade_id).some(function(y){return y.id===+m.meta.subject_id})?[]:REF.subjects.filter(function(y){return y.id===+m.meta.subject_id})).map(function(x){return '<option value="'+x.id+'"'+(+m.meta.subject_id===x.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></label></div><div class="row"><label class="fld"><span>الأسبوع</span><select data-mf="week"'+dis+'>'+wk.map(function(x){return '<option value="'+x+'"'+(+m.meta.week===x?' selected':'')+'>الأسبوع '+n(x)+'</option>'}).join('')+'</select></label><div class="fld"><span>النوع</span><div class="tabs" role="group" aria-label="النوع">'+['A','C','H'].map(function(x){return '<button type="button" class="tab'+(m.meta.kind===x?' on':'')+'" data-act="mKind" data-k="'+x+'" aria-pressed="'+(m.meta.kind===x?'true':'false')+'"'+dis+'>'+KN[x]+'</button>'}).join('')+'</div></div><label class="fld"><span>موعد النزول</span><input type="datetime-local" data-mf="release_at" value="'+esc(m.meta.release_at)+'"'+dis+' dir="ltr"></label></div></div>';
   var qs=m.qs.map(function(q,i){return mQHtml(q,i,ro)}).join('');
-  var foot=ro?'':'<div class="row">'+btn('+ إضافة سؤال','mAddQ','','sec')+'</div><div class="card"><div class="row" style="justify-content:space-between"><b>'+n(m.qs.length)+' سؤال · '+fmtN(tot)+' درجة</b>'+(m.dirty?bdg('تعديلات غير محفوظة','warn'):'')+'</div>'+(R.mpub===1?'<div class="msg warn">هل أنت متأكد من نشر هذا؟</div><div class="row">'+btn('نعم، تابع','mPub',{s:2})+btn('لا','mPub',{s:0},'sec')+'</div>':(R.mpub===2?'<div class="msg bad">تأكيد أخير: بعد نزوله في الموعد لا يمكن تعديله ولا حذفه، ولا يمكن التراجع.</div><div class="row">'+btn(BUSY?'جارٍ النشر…':'نعم، انشر نهائياً','mPub',{s:3},'',BUSY)+btn('لا','mPub',{s:0},'sec')+'</div>':'<div class="row">'+btn(BUSY?'جارٍ الحفظ…':'حفظ المسودة','mSave','','',BUSY)+btn('نشر','mPub',{s:1},'sec')+'</div>'))+'<span class="hint">المنشور الذي لم يحن موعده يظل قابلاً للتعديل، والمسودة لا تظهر للمدارس.</span></div>';
+  var foot=ro?'':'<div class="row">'+btn('+ إضافة سؤال','mAddQ','','sec')+'</div><div class="card"><div class="row" style="justify-content:space-between"><b>'+n(m.qs.length)+' سؤال · '+fmtN(tot)+' درجة</b>'+(m.dirty?bdg('تعديلات غير محفوظة','attn'):'')+'</div>'+(R.mpub===1?'<div class="msg warn">هل أنت متأكد من نشر هذا؟</div><div class="row">'+btn('نعم، تابع','mPub',{s:2})+btn('لا','mPub',{s:0},'sec')+'</div>':(R.mpub===2?'<div class="msg bad">تأكيد أخير: بعد نزوله في الموعد لا يمكن تعديله ولا حذفه، ولا يمكن التراجع.</div><div class="row">'+btn(BUSY?'جارٍ النشر…':'نعم، انشر نهائياً','mPub',{s:3},'',BUSY)+btn('لا','mPub',{s:0},'sec')+'</div>':'<div class="row">'+btn(BUSY?'جارٍ الحفظ…':'حفظ المسودة','mSave','','',BUSY)+btn('نشر','mPub',{s:1},'sec')+'</div>'))+'<span class="hint">المنشور الذي لم يحن موعده يظل قابلاً للتعديل، والمسودة لا تظهر للمدارس.</span></div>';
   return top+hd+(qs||'<div class="msg">لا توجد أسئلة بعد. اضغط «إضافة سؤال».</div>')+foot}
 function vMPreview(){
   var m=C.me,pa=R.pva||{},show=!!R.mshow;
@@ -906,7 +928,7 @@ async function mDoSave(){
 
 /* ---------- الرسم ---------- */
 /* ======================= النسخة ١٢: خصوصية، جولة، عن التطبيق، قوة كلمة المرور، تغيير الاسم، Web Push ======================= */
-var APP_VER='15',APP_DATE='2026-11-21',PRIV_VER=1;
+var APP_VER='16',APP_DATE='2026-11-21',PRIV_VER=1;
 var PRIV_ITEMS=['نجمع اسمك وكودك وسنتك الدراسية وفصلك ومدرستك، وإجاباتك ودرجاتك داخل التطبيق فقط.','نستخدم البيانات لتشغيل التقييمات والأداءات وعرض النتائج لك ولمدرسيك ولمدير مدرستك.','لا نبيع بياناتك ولا نشاركها مع أي جهة خارج المنظومة التعليمية.','كلمة المرور محفوظة مشفّرة ولا يراها أي شخص، حتى مدير المدرسة.','تُحفظ إجاباتك مؤقتاً على جهازك لتعمل بدون إنترنت، وتُرفع عند توفر الاتصال.','تنبيهات الجهاز اختيارية، ولا تحتوي على أسماء أو درجات.','في نهاية السنة الدراسية تُحذف سجلات الطلاب حسب قرار المدرسة.','تقدر تطلب تصحيح بياناتك من مدير المدرسة في أي وقت من صفحة «حسابي».'];
 var TOURS={
  student:[['المواد والتقييمات','من الصفحة الرئيسية اختر المادة، وبعدها تقييمات أو أداءات صفية أو أداءات منزلية. الأسبوع بيتفتح لما المدرس يفتحه (والمنزلي بيفتح لوحده في أسبوعه).'],['وقت الامتحان','إجاباتك بتتحفظ على جهازك حتى لو النت فصل، وبترفع تلقائياً لما يرجع. اضغط «تسليم» في الآخر.'],['درجاتك وأخطاؤك','من «درجاتي» تشوف نتايجك، ومن «أخطائي» تراجع أسئلتك الغلط. والإشعارات بتعرفك بأي جديد.']],
