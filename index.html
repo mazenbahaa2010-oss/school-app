@@ -224,13 +224,13 @@ h3.hd .hi{width:34px;height:34px;border-radius:10px}
 var CFG=window.TRIAL_CFG||{url:'',key:''};
 /* ---------- أدوات ---------- */
 var MIN=6e4;
-var n=function(x){return String(x).replace(/\d/g,function(d){return '٠١٢٣٤٥٦٧٨٩'[d]})};
+var n=function(x){return String(x).replace(/\d/g,function(d){return EL==='en'?d:'٠١٢٣٤٥٦٧٨٩'[d]})};
 var lat=function(s){return String(s||'').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).trim()};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
-var fmtN=function(x){return n(String(x)).replace('.','٫')};
+var fmtN=function(x){return n(String(x)).replace('.',EL==='en'?'.':'٫')};
 var KN={A:'تقييم أسبوعي',C:'أداء صفي',H:'أداء منزلي'};
-function fd(t){return new Date(t).toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'})}
-function ft(t){return new Date(t).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}
+function fd(t){return new Date(t).toLocaleDateString(EL==='en'?'en-GB':'ar-EG',{weekday:'long',day:'numeric',month:'long'})}
+function ft(t){return new Date(t).toLocaleTimeString(EL==='en'?'en-GB':'ar-EG',{hour:'2-digit',minute:'2-digit'})}
 function mmss(ms){ms=Math.max(0,Math.floor(ms/1000));var m=Math.floor(ms/60),s=ms%60;return n(('0'+m).slice(-2)+':'+('0'+s).slice(-2))}
 function lsGet(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}
 var H={},MIN=60000;
@@ -263,8 +263,9 @@ async function decryptPkg(pkg,key){
 /* ---------- الاتصال بالسيرفر ---------- */
 var SES=lsGet('trial-ses'),P=null,REF={subjects:[]},C={unread:0,pend:0,queue:[]},R={v:'login',f:{}},MODAL='',MODALF=null,MODALL='',BUSY=false,LOADERR='';
 function gsHas(g,sid){return (REF.gs||[]).some(function(x){return x.g==g&&x.s==sid})}
-function subsFor(g){return REF.subjects.filter(function(x){return gsHas(g,x.id)})}
-function subsAny(keep){return REF.subjects.filter(function(x){return (REF.gs||[]).some(function(y){return y.s==x.id})||(keep||[]).indexOf(x.id)>-1})}
+function trackOk(x){var k=P&&P.school_kind;return !k||!x.track||x.track==='both'||x.track===k}
+function subsFor(g){return REF.subjects.filter(function(x){return gsHas(g,x.id)&&trackOk(x)})}
+function subsAny(keep){return REF.subjects.filter(function(x){return ((REF.gs||[]).some(function(y){return y.s==x.id})&&trackOk(x))||(keep||[]).indexOf(x.id)>-1})}
 function sn(id){var s=REF.subjects.filter(function(x){return x.id==id})[0];return s?s.name:'—'}
 function emsg(e){var m=(e&&e.message)||'حدث خطأ';
   if(e&&e.net)return 'تعذّر الاتصال بالسيرفر. تأكد من النت وحاول مرة أخرى.';
@@ -348,7 +349,7 @@ function subjIcon(nm,id){if(id!=null){var rs=REF.subjects.filter(function(x){ret
 function empty(ic,t,sub){return '<div class="empty">'+(SIC[ic]||SIC.inbox)+'<b>'+t+'</b>'+(sub?'<span>'+sub+'</span>':'')+'</div>'}
 var ENTER=false,LASTSYNC=0;
 function qimg(s){return s?'<img class="qi" src="'+esc(s)+'" alt="صورة">':''}
-function showQ(q,pos){return '<b dir="'+(q.dir==='ltr'?'ltr':'rtl')+'">'+n(pos)+'. '+esc(q.body)+'</b>'+qimg(q.image)+'<span class="hint">('+fmtN(q.points)+' درجة)</span>'}
+function showQ(q,pos){return '<b dir="'+(q.dir==='ltr'?'ltr':'rtl')+'"><span data-notr="1">'+n(pos)+'. '+esc(q.body)+'</span></b>'+qimg(q.image)+'<span class="hint">('+fmtN(q.points)+' درجة)</span>'}
 
 /* مراجعة الاختيارات: أخضر صحيح، أحمر خطأ، أصفر صحيحة لم تُختر (للمتعدد) */
 function optReview(q,who){
@@ -390,13 +391,13 @@ function toastHtml(){return TOAST?'<div class="toast" role="status"><span>'+esc(
 function toast(msg,undo){TOAST={msg:msg,undo:undo||null};clearTimeout(TT);TT=setTimeout(function(){TOAST=null;draw()},8000);draw()}
 function shell(inner){
   var nav=navFor(),q=C.queue.length;
-  return '<header class="top"><div class="brand">'+logoSvg(38)+'<b>'+BRAND+'</b></div><nav>'+nav.map(function(x){var b=badgeFor(x[0]);if(x[0]==='notes')return '<button type="button" class="nv bell'+(R.v==='notes'?' on':'')+'" data-act="go" data-v="notes" aria-label="الإشعارات" title="الإشعارات">'+SIC.bell+'<span class="badge warn" data-bd="notes"'+(b?'':' hidden')+'>'+b+'</span></button>';return '<button type="button" class="nv'+(R.v===x[0]||(x[2]&&x[2].indexOf(R.v)>-1)?' on':'')+'" data-act="go" data-v="'+x[0]+'">'+x[1]+' <span class="badge warn" data-bd="'+x[0]+'"'+(b?'':' hidden')+'>'+b+'</span></button>'}).join('')+'</nav><div class="who">'+netB()+(q?bdg('بانتظار رفع '+n(q),'warn'):'')+'<button type="button" class="av" data-act="go" data-v="profile" aria-label="حسابي" title="حسابي">'+esc(ini(P.name))+'</button></div></header><main class="wrap'+(ENTER?' enter':'')+'">'+banners()+toastHtml()+inner+'</main>'}
+  return '<header class="top"><div class="brand">'+logoSvg(38)+'<b>'+BRAND+'</b></div><nav>'+nav.map(function(x){var b=badgeFor(x[0]);if(x[0]==='notes')return '<button type="button" class="nv bell'+(R.v==='notes'?' on':'')+'" data-act="go" data-v="notes" aria-label="الإشعارات" title="الإشعارات">'+SIC.bell+'<span class="badge warn" data-bd="notes"'+(b?'':' hidden')+'>'+b+'</span></button>';return '<button type="button" class="nv'+(R.v===x[0]||(x[2]&&x[2].indexOf(R.v)>-1)?' on':'')+'" data-act="go" data-v="'+x[0]+'">'+x[1]+' <span class="badge warn" data-bd="'+x[0]+'"'+(b?'':' hidden')+'>'+b+'</span></button>'}).join('')+'</nav><div class="who">'+(P.role==='student'?'<button type="button" class="nv" data-act="lang" lang="'+(EL==='en'?'ar':'en')+'" aria-label="'+(EL==='en'?'تغيير اللغة إلى العربية':'Change language to English')+'" data-notr="1">'+(EL==='en'?'ع':'EN')+'</button>':'')+netB()+(q?bdg('بانتظار رفع '+n(q),'warn'):'')+'<button type="button" class="av" data-act="go" data-v="profile" aria-label="حسابي" title="حسابي">'+esc(ini(P.name))+'</button></div></header><main class="wrap'+(ENTER?' enter':'')+'">'+banners()+toastHtml()+inner+'</main>'}
 function loading(){return '<div class="sk" style="min-height:44px;max-width:240px"></div><div class="grid"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div><span class="sub" role="status">جارٍ التحميل…</span>'}
 function failed(){return '<div class="empty">'+SIC.inbox+'<b>تعذّر تحميل الصفحة</b><span>اتأكد من النت وجرّب تاني.</span><details class="sub"><summary>التفاصيل</summary>'+esc(LOADERR)+'</details>'+btn('إعادة المحاولة','reload')+'</div>'}
 
 /* ---------- الدخول ---------- */
 function vLogin(){
-  return '<div class="auth"><div class="row" style="justify-content:flex-end">'+themeBtn()+'</div><div class="center card" style="gap:6px">'+logoSvg(84)+'<h1>'+BRAND+'</h1><span class="sub">'+BRAND_DESC+'</span><b class="slogan">'+BRAND_SLOGAN+'</b>'+bdg('نسخة تجريبية','warn')+'</div><form class="card" data-submit="doLogin">'+fld('الكود أو اسم المستخدم','code',{ph:'مثال: 10452-s-0001',dir:'ltr',ac:'username'})+fld('كلمة المرور','pw',{type:R.f.showpw?'text':'password',ac:'current-password',dir:'ltr'})+'<div class="row" style="margin-top:-6px"><button type="button" class="lnk" data-act="togglePw" aria-pressed="'+(R.f.showpw?'true':'false')+'">'+(R.f.showpw?'🙈 إخفاء كلمة المرور':'👁 إظهار كلمة المرور')+'</button></div>'+err()+'<button class="btn" type="submit"'+(BUSY?' disabled':'')+'>'+(BUSY?'جارٍ الدخول…':'دخول')+'</button><span class="hint">الكود تحصل عليه من إدارة المدرسة، وكلمة المرور المؤقتة تُعطى لك معه.</span></form>'+forgotHtml()+'<details class="first"><summary>أول مرة تدخل؟</summary><ol><li>اطلب كودك وكلمة مرورك المؤقتة من إدارة المدرسة.</li><li>اكتب الكود وكلمة المرور واضغط «دخول».</li><li>غيّر كلمة مرورك من صفحة «حسابي» (الدائرة اللي فوق).</li></ol></details></div>'}
+  return '<div class="auth"><div class="row" style="justify-content:flex-end">'+langBtn()+themeBtn()+'</div><div class="center card" style="gap:6px">'+logoSvg(84)+'<h1>'+BRAND+'</h1><span class="sub">'+BRAND_DESC+'</span><b class="slogan">'+BRAND_SLOGAN+'</b>'+bdg('نسخة تجريبية','warn')+'</div><form class="card" data-submit="doLogin">'+fld('الكود أو اسم المستخدم','code',{ph:'مثال: 10452-s-0001',dir:'ltr',ac:'username'})+fld('كلمة المرور','pw',{type:R.f.showpw?'text':'password',ac:'current-password',dir:'ltr'})+'<div class="row" style="margin-top:-6px"><button type="button" class="lnk" data-act="togglePw" aria-pressed="'+(R.f.showpw?'true':'false')+'">'+(R.f.showpw?'🙈 إخفاء كلمة المرور':'👁 إظهار كلمة المرور')+'</button></div>'+err()+'<button class="btn" type="submit"'+(BUSY?' disabled':'')+'>'+(BUSY?'جارٍ الدخول…':'دخول')+'</button><span class="hint">الكود تحصل عليه من إدارة المدرسة، وكلمة المرور المؤقتة تُعطى لك معه.</span></form>'+forgotHtml()+'<details class="first"><summary>أول مرة تدخل؟</summary><ol><li>اطلب كودك وكلمة مرورك المؤقتة من إدارة المدرسة.</li><li>اكتب الكود وكلمة المرور واضغط «دخول».</li><li>غيّر كلمة مرورك من صفحة «حسابي» (الدائرة اللي فوق).</li></ol></details></div>'}
 function forgotHtml(){
   var f=R.f;
   if(!f.fgo)return '<div class="row" style="justify-content:center"><button type="button" class="lnk" data-act="forgotOpen">نسيت كلمة المرور؟</button></div>';
@@ -442,7 +443,7 @@ function ansDone(q,ex){var a=ex.ans[q.id];if(q.type==='mcq')return a!=null;if(q.
 function examStats(ex){var qs=qOrder(ex),done=0,fl=0;qs.forEach(function(q){if(ansDone(q,ex))done++;if(ex.flags&&ex.flags[q.id])fl++});return {qs:qs,done:done,fl:fl,total:qs.length}}
 function updExam(){var ex=C.ex;if(R.v!=='sExam'||!ex)return;var st=examStats(ex);
   var pg=document.getElementById('pgbar');if(pg)pg.style.width=(st.total?Math.round(st.done*100/st.total):0)+'%';
-  var pt=document.getElementById('pgtxt');if(pt)pt.textContent='أجبت على '+n(st.done)+' من '+n(st.total);
+  var pt=document.getElementById('pgtxt');if(pt)pt.textContent=T('أجبت على '+n(st.done)+' من '+n(st.total));
   st.qs.forEach(function(q){var f=!!(ex.flags&&ex.flags[q.id]),c=document.getElementById('qn'+q.id);if(c){c.classList.toggle('a',ansDone(q,ex));c.classList.toggle('f',f)}
     var card=document.getElementById('qc'+q.id);if(card)card.classList.toggle('flagged',f);
     var fb=document.getElementById('fl'+q.id);if(fb)fb.setAttribute('aria-pressed',f?'true':'false')})}
@@ -453,8 +454,8 @@ function vSExam(){
   var h='<div class="exh"><div class="tl"><div><h2>'+esc(sn(a.subject_id))+'</h2><span class="sub">'+esc(a.title)+'</span></div><div class="row">'+netB()+(isH?'<span class="sub">آخر موعد '+fd(end)+'</span>':'<span class="timer" id="tm">'+mmss(end-NOW())+'</span>')+'</div></div><div class="pgrow"><div class="pg" role="progressbar" aria-label="التقدم"><i id="pgbar" style="width:'+(st.total?Math.round(st.done*100/st.total):0)+'%"></i></div><span class="sub" id="pgtxt" style="white-space:nowrap">أجبت على '+n(st.done)+' من '+n(st.total)+'</span></div><div class="qns">'+chips+'</div></div>';
   var qs=st.qs.map(function(q,pos){var dr=' dir="'+(q.dir==='ltr'?'ltr':'rtl')+'"',hd=showQ(q,pos+1),ans=ex.ans[q.id],fl=flagBtn(q,ex),cl='q'+(ex.flags&&ex.flags[q.id]?' flagged':'');
     var opts=shuffled(q.options,P.id+':'+q.id);
-    if(q.type==='mcq')return '<div class="'+cl+'" id="qc'+q.id+'"'+dr+'>'+hd+opts.map(function(o){return '<label class="opt"><input type="radio" name="q'+q.id+'" value="'+o.id+'" data-chg="ans" data-q="'+q.id+'"'+(ans===o.id?' checked':'')+'><span>'+esc(o.body)+'</span></label>'}).join('')+fl+'</div>';
-    if(q.type==='multi')return '<div class="'+cl+'" id="qc'+q.id+'"'+dr+'>'+hd+'<span class="hint">اختر كل الإجابات الصحيحة.</span>'+opts.map(function(o){return '<label class="opt"><input type="checkbox" value="'+o.id+'" data-chg="ansm" data-q="'+q.id+'"'+((ans||[]).indexOf(o.id)>-1?' checked':'')+'><span>'+esc(o.body)+'</span></label>'}).join('')+fl+'</div>';
+    if(q.type==='mcq')return '<div class="'+cl+'" id="qc'+q.id+'"'+dr+'>'+hd+opts.map(function(o){return '<label class="opt"><input type="radio" name="q'+q.id+'" value="'+o.id+'" data-chg="ans" data-q="'+q.id+'"'+(ans===o.id?' checked':'')+'><span data-notr="1">'+esc(o.body)+'</span></label>'}).join('')+fl+'</div>';
+    if(q.type==='multi')return '<div class="'+cl+'" id="qc'+q.id+'"'+dr+'>'+hd+'<span class="hint">اختر كل الإجابات الصحيحة.</span>'+opts.map(function(o){return '<label class="opt"><input type="checkbox" value="'+o.id+'" data-chg="ansm" data-q="'+q.id+'"'+((ans||[]).indexOf(o.id)>-1?' checked':'')+'><span data-notr="1">'+esc(o.body)+'</span></label>'}).join('')+fl+'</div>';
     return '<div class="'+cl+'" id="qc'+q.id+'"'+dr+'>'+hd+'<span class="hint">سؤال مقالي يصححه المدرس.</span><textarea class="inp" '+dr+' data-inp="essay" data-q="'+q.id+'" style="min-height:120px;padding:10px">'+esc(ans||'')+'</textarea>'+fl+'</div>'}).join('');
   var un=st.total-st.done;
   var foot=R.confirm?'<div class="msg warn">'+(un?'عندك '+n(un)+' '+(un===1?'سؤال':'أسئلة')+' من غير إجابة. ':'')+(st.fl?'وعلّمت '+n(st.fl)+' للمراجعة. ':'')+'متأكد من التسليم؟ لا يمكن التعديل بعده.</div><div class="row">'+btn('نعم، سلّم','submitYes')+btn('رجوع للأسئلة','submitNo','','sec')+'</div>':btn('تسليم','submitAsk');
@@ -496,7 +497,7 @@ function vProfile(){
   var rep=(P.role==='student'||P.role==='teacher')?'<div class="card"><h3>في خطأ في بياناتي؟</h3><span class="sub">اكتب الخطأ وهيوصل لمدير المدرسة يصلّحه.</span><label class="fld"><span>وصف الخطأ</span><textarea data-bind="rtxt" placeholder="مثال: اسمي مكتوب غلط، أو سنتي/فصلي غلط" style="min-height:90px">'+esc(f.rtxt||'')+'</textarea></label><div class="row">'+btn('إرسال البلاغ','sendReport')+'</div></div>':'';
   return '<h1>حسابي</h1>'+okm()+err()+'<div class="card"><div class="pf"><span class="av" aria-hidden="true">'+esc(ini(P.name))+'</span><div><h2>'+esc(P.name)+'</h2><span class="sub">'+(ROLE_AR[P.role]||'')+(P.school?' · '+esc(P.school):'')+'</span></div></div><dl class="kv">'+dl+'</dl></div>'+
    '<div class="card"><h3>كلمة المرور</h3><div class="row"><span style="font-size:1.4rem;letter-spacing:4px" aria-label="مخفية">••••••••</span>'+btn('تغيير كلمة المرور','myPw','','sec sm')+'</div><span class="hint">كلمة المرور محفوظة مشفّرة ولا تُعرض لأي حد. لو نسيتها اطلب من مدير المدرسة كلمة جديدة.</span></div>'+
-   '<div class="card"><h3>المظهر</h3><div><b>الوضع</b>'+seg([['auto','تلقائي'],['light','نهاري'],['dark','ليلي']],th,'setTheme')+'</div><div><b>حجم الخط</b>'+seg([['md','عادي'],['lg','كبير'],['xl','كبير جداً']],fs,'setFs')+'</div></div>'+
+   langCard()+'<div class="card"><h3>المظهر</h3><div><b>الوضع</b>'+seg([['auto','تلقائي'],['light','نهاري'],['dark','ليلي']],th,'setTheme')+'</div><div><b>حجم الخط</b>'+seg([['md','عادي'],['lg','كبير'],['xl','كبير جداً']],fs,'setFs')+'</div></div>'+
    '<div class="card"><h3>التطبيق والإشعارات</h3><div class="row">'+(INST?btn('تثبيت التطبيق','install','','sec sm'):'<span class="hint">للتثبيت: من قائمة Chrome اختر «تثبيت التطبيق».</span>')+np+'</div><div class="row">'+pushRow()+'</div></div>'+
    '<div class="card"><h3>الاتصال</h3><div class="row">'+netB()+'<span class="sub">آخر مزامنة: '+(LASTSYNC?ft(LASTSYNC):'—')+'</span>'+btn('تحديث','refreshNow','','sec sm')+'</div></div>'+nameCard()+rep+
    '<div class="card"><h3>المساعدة</h3><div class="row">'+btn('جولة تعريفية','tourOpen','','sec sm')+btn('إشعار الخصوصية','showPriv','','sec sm')+btn('عن التطبيق','about','','sec sm')+'</div>'+(P.consent_at?'<span class="hint">وافقت على إشعار الخصوصية بتاريخ '+fd(P.consent_at)+'</span>':'')+'</div>'+
@@ -736,7 +737,7 @@ function archHtml(){
 function vACls(){
   var a=C.ad,f=R.f;
   var form='<div class="card"><h3 class="hd">'+HI('users')+'فصل جديد</h3><div class="row">'+fld('اسم الفصل','cname',{ph:'مثال: ١/ب'})+'<label class="fld"><span>السنة الدراسية</span><select data-bind="cg">'+gOpts().map(function(x){return '<option value="'+x[0]+'"'+(+f.cg===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label></div>'+btn('إنشاء الفصل','addCls')+'</div>';
-  var subjT=REF.subjects.map(function(s){return {s:s,t:a.teachers.filter(function(t){return t.subjects.indexOf(s.id)>-1})}}).filter(function(x){return x.t.length});
+  var subjT=REF.subjects.filter(trackOk).map(function(s){return {s:s,t:a.teachers.filter(function(t){return t.subjects.indexOf(s.id)>-1})}}).filter(function(x){return x.t.length});
   var cards=a.classes.map(function(c){
     var tr=subjT.filter(function(x){return gsHas(c.grade_id,x.s.id)||c.teachers.some(function(y){return y.subject_id===x.s.id})}).map(function(x){var cur=(c.teachers.filter(function(y){return y.subject_id===x.s.id})[0]||{}).teacher_id||'';
       return '<label class="fld"><span>'+esc(x.s.name)+'</span><select data-chg="ct" data-c="'+c.id+'" data-s="'+x.s.id+'"><option value="">— بدون مدرس —</option>'+x.t.map(function(t){return '<option value="'+t.id+'"'+(cur===t.id?' selected':'')+'>'+esc(t.name)+'</option>'}).join('')+'</select></label>'}).join('');
@@ -873,7 +874,7 @@ async function mDoSave(){
 
 /* ---------- الرسم ---------- */
 /* ======================= النسخة ١٢: خصوصية، جولة، عن التطبيق، قوة كلمة المرور، تغيير الاسم، Web Push ======================= */
-var APP_VER='12',APP_DATE='2026-11-20',PRIV_VER=1;
+var APP_VER='13',APP_DATE='2026-11-21',PRIV_VER=1;
 var PRIV_ITEMS=['نجمع اسمك وكودك وسنتك الدراسية وفصلك ومدرستك، وإجاباتك ودرجاتك داخل التطبيق فقط.','نستخدم البيانات لتشغيل التقييمات والأداءات وعرض النتائج لك ولمدرسيك ولمدير مدرستك.','لا نبيع بياناتك ولا نشاركها مع أي جهة خارج المنظومة التعليمية.','كلمة المرور محفوظة مشفّرة ولا يراها أي شخص، حتى مدير المدرسة.','تُحفظ إجاباتك مؤقتاً على جهازك لتعمل بدون إنترنت، وتُرفع عند توفر الاتصال.','تنبيهات الجهاز اختيارية، ولا تحتوي على أسماء أو درجات.','في نهاية السنة الدراسية تُحذف سجلات الطلاب حسب قرار المدرسة.','تقدر تطلب تصحيح بياناتك من مدير المدرسة في أي وقت من صفحة «حسابي».'];
 var TOURS={
  student:[['المواد والتقييمات','من الصفحة الرئيسية اختر المادة، وبعدها تقييمات أو أداءات صفية أو أداءات منزلية. الأسبوع بيتفتح لما المدرس يفتحه (والمنزلي بيفتح لوحده في أسبوعه).'],['وقت الامتحان','إجاباتك بتتحفظ على جهازك حتى لو النت فصل، وبترفع تلقائياً لما يرجع. اضغط «تسليم» في الآخر.'],['درجاتك وأخطاؤك','من «درجاتي» تشوف نتايجك، ومن «أخطائي» تراجع أسئلتك الغلط. والإشعارات بتعرفك بأي جديد.']],
@@ -927,9 +928,144 @@ function pushRow(){if(!PUSH.ok)return '<span class="hint">التنبيهات ا�
   if(Notification.permission==='denied')return '<span class="hint">التنبيهات مقفولة من إعدادات المتصفح.</span>';
   return PUSH.on?bdg('التنبيهات اللحظية مفعّلة','ok')+btn('إيقاف','pushOff','','sec sm',PUSH.busy):btn(PUSH.busy?'جارٍ التفعيل…':'تفعيل التنبيهات اللحظية','pushOn','','sec sm',PUSH.busy)}
 
+/* ======================= النسخة ١٣: لغة الواجهة (عربي / English) للطالب وصفحة الدخول ======================= */
+var EL='ar';
+var EN={
+ 'تقييمي':'Taqeemy','المنصة الإلكترونية للتقييمات والأداءات':'The e-platform for assessments and performances','قياس دقيق.. وتعلّم أفضل':'Accurate measurement.. better learning','نسخة تجريبية':'Trial version',
+ 'الكود أو اسم المستخدم':'Code or username','كلمة المرور':'Password','دخول':'Log in','جارٍ الدخول…':'Logging in…','أول مرة تدخل؟':'First time here?',
+ 'مثال: 10452-s-0001':'e.g. 10452-s-0001','👁 إظهار كلمة المرور':'👁 Show password','🙈 إخفاء كلمة المرور':'🙈 Hide password','🙈 إخفاء':'🙈 Hide','👁 إظهار':'👁 Show',
+ 'الكود تحصل عليه من إدارة المدرسة، وكلمة المرور المؤقتة تُعطى لك معه.':'You get your code from the school administration, together with a temporary password.',
+ 'اطلب كودك وكلمة مرورك المؤقتة من إدارة المدرسة.':'Ask the school administration for your code and temporary password.','اكتب الكود وكلمة المرور واضغط «دخول».':'Enter the code and password, then press “Log in”.','غيّر كلمة مرورك من صفحة «حسابي» (الدائرة اللي فوق).':'Change your password from “My account” (the circle at the top).',
+ 'نسيت كلمة المرور؟':'Forgot your password?','نسيت كلمة المرور':'Forgot your password','اكتب كودك وسيصل طلبك لإدارة المدرسة، وهي تعطيك كلمة مرور جديدة.':'Enter your code and your request will go to the school administration, who will give you a new password.','كودك':'Your code','إرسال الطلب':'Send request','جارٍ الإرسال…':'Sending…','إلغاء':'Cancel','رجوع':'Back',
+ 'لو الكود صحيح وصل طلبك لإدارة المدرسة. هتديك كلمة مرور جديدة.':'If the code is correct, your request has reached the school administration. They will give you a new password.',
+ 'اكتب الكود وكلمة المرور.':'Enter your code and password.','الكود أو كلمة المرور غير صحيحة.':'The code or password is incorrect.','تعذّر الاتصال بالسيرفر. تأكد من النت وحاول مرة أخرى.':'Could not reach the server. Check your internet and try again.','انتهت الجلسة. سجّل الدخول من جديد.':'Session expired. Please log in again.','حدث خطأ':'Something went wrong',
+ 'الحساب مؤرشف. تواصل مع إدارة المدرسة.':'This account is archived. Contact the school administration.',
+ '☀ الوضع النهاري':'☀ Light mode','☾ الوضع الليلي':'☾ Dark mode','التحويل إلى الوضع النهاري':'Switch to light mode','التحويل إلى الوضع الليلي':'Switch to dark mode',
+ 'المواد':'Subjects','أخطائي':'My mistakes','درجاتي':'My grades','الإشعارات':'Notifications','حسابي':'My account',
+ 'صباح الخير':'Good morning','مساء الخير':'Good evening','لم تتم إضافتك إلى فصل بعد':'You have not been added to a class yet','تواصل مع إدارة المدرسة.':'Contact the school administration.',
+ 'ابدأ الآن':'Start now','تقييم مفتوح':'Assessment open','لا شيء مطلوب':'Nothing due','تحديث':'Refresh','← المواد':'← Subjects',
+ 'تقييم أسبوعي':'Weekly assessment','أداء صفي':'Class performance','أداء منزلي':'Home performance',
+ 'الأداء المنزلي يفتح عند نزوله ويتقفل بعد أسبوع.':'Home performances open when released and close after one week.','ينزل مقفولاً ويفتحه المدرس أثناء الحصة.':'It is released locked, and the teacher opens it during the lesson.',
+ 'مفيش حاجة هنا لسه':'Nothing here yet','هتظهر هنا أول ما تنزل.':'It will appear here as soon as it is released.',
+ 'سلّمت':'Submitted','رُفض التسليم المتأخر':'Late submission rejected','سلّمت · ينتظر قرار المدرس في التأخير':'Submitted · waiting for the teacher to decide on the delay','الدرجة بعد فتح الإجابات':'Score after answers open','بانتظار التصحيح':'Awaiting grading',
+ 'الإجابات والدرجة':'Answers & score','عرض':'View','محفوظ على التابلت · يُرفع عند توفر النت':'Saved on the tablet · uploads when online','فاتك · الإجابات النموذجية متاحة':'Missed · model answers available','الإجابات النموذجية':'Model answers',
+ 'تابع':'Continue','ابدأ':'Start','انتهى الموعد':'Deadline passed','مفتوح الآن':'Open now','بانتظار فتح المدرس':'Waiting for the teacher to open',
+ 'أجبت على':'Answered','راجعني لاحقاً':'Review later','اختر كل الإجابات الصحيحة.':'Select all correct answers.','سؤال مقالي يصححه المدرس.':'Essay question graded by the teacher.','تسليم':'Submit','نعم، سلّم':'Yes, submit','رجوع للأسئلة':'Back to questions','التقدم':'Progress',
+ 'متأكد من التسليم؟ لا يمكن التعديل بعده.':'Sure you want to submit? You cannot edit afterwards.',
+ 'انقطع النت. إجاباتك محفوظة على التابلت أولاً بأول، وسيُرفع الحل تلقائياً عند عودة النت.':'You are offline. Your answers are saved on the tablet as you go and will upload automatically when the internet returns.',
+ 'تم الحفظ ✓':'Saved ✓','تم الحفظ على التابلت ✓':'Saved on the tablet ✓','إجاباتك محفوظة وستُرفع تلقائياً عند توفر النت. لا تغلق المتصفح قبل أن تختفي علامة «بانتظار الرفع».':'Your answers are saved and will upload automatically when online. Do not close the browser until the “Waiting to upload” badge disappears.',
+ 'إجاباتك محفوظة على التابلت وستُرفع تلقائياً عند توفر النت.':'Your answers are saved on the tablet and will upload automatically when online.',
+ 'وصل التسليم متأخراً أكثر من يوم، وينتظر قرار المدرس.':'Your submission arrived more than a day late and is waiting for the teacher’s decision.','رفض المدرس التسليم المتأخر.':'The teacher rejected the late submission.',
+ 'ممتاز! كمّل على كده':'Excellent! Keep it up','أحسنت':'Well done','كويس، راجع الأسئلة اللي فاتتك':'Good, review the questions you missed','ولا يهمك، راجع أخطاءك وهتتحسن':'Don’t worry, review your mistakes and you will improve','الدرجة تكتمل بعد تصحيح المدرس':'The score will be complete after the teacher grades',
+ 'لم تحل هذا. هذه الإجابات النموذجية لتستفيد منها.':'You did not solve this. Here are the model answers so you can benefit from them.',
+ 'تظهر الدرجة والإجابات الصحيحة بعد انتهاء موعد الأداء المنزلي.':'The score and correct answers appear after the home performance deadline.','تظهر الدرجة والإجابات الصحيحة بعد أن يفتح المدرس نموذج الإجابة.':'The score and correct answers appear after the teacher opens the answer model.',
+ 'الأسئلة التي لم تأخذ درجتها كاملة في التقييمات التي فُتحت إجاباتها.':'Questions where you did not get full marks, in assessments whose answers have been opened.','المادة':'Subject','كل المواد':'All subjects',
+ 'مفيش أخطاء لمراجعتها دلوقتي':'No mistakes to review right now','كمّل بنفس المستوى.':'Keep up the same level.',
+ 'ملخص المواد':'Subjects summary','عدد ما صُحّح':'Graded','المجموع':'Total','النسبة':'Percentage','التفاصيل':'Details','التقييم / الأداء':'Assessment / Performance','الدرجة':'Score','لا توجد درجات ظاهرة بعد.':'No visible scores yet.','تظهر الدرجة بعد فتح الإجابات.':'Scores appear after answers are opened.','مستواك كويس في كل المواد، كمّل كده 👏':'Your level is good in all subjects, keep going 👏',
+ 'اخترتها':'You chose it','اخترتها وهي خطأ':'You chose it (wrong)','صحيحة · لم تختر':'Correct · not chosen','الإجابة الصحيحة':'Correct answer','إجابتك:':'Your answer:','لم يُكتب شيء':'Nothing written','نموذج الإجابة:':'Model answer:','بانتظار تصحيح المدرس':'Awaiting teacher grading','عدّل المدرس هذه الدرجة':'The teacher edited this score',
+ 'ملخص':'Summary','الملخص:':'Summary:',
+ 'مفيش إشعارات':'No notifications','هتوصلك هنا أول ما المدرس يفتح تقييم.':'They will appear here as soon as the teacher opens an assessment.','تفعيل تنبيهات الجهاز':'Enable device alerts',
+ 'تغيير كلمة المرور':'Change password','كلمة المرور الحالية':'Current password','كلمة المرور الجديدة':'New password','أعد كتابة الجديدة':'Retype the new password','٦ أحرف على الأقل':'At least 6 characters','حفظ كلمة المرور':'Save password','جارٍ الحفظ…':'Saving…',
+ 'املأ الخانات التلاتة.':'Fill in all three fields.','كلمة المرور الجديدة لازم تكون ٦ أحرف على الأقل.':'The new password must be at least 6 characters.','كلمتا المرور الجديدتان غير متطابقتين.':'The two new passwords do not match.','الجديدة لازم تختلف عن الحالية.':'The new password must differ from the current one.',
+ 'قوة كلمة المرور: ضعيفة':'Password strength: weak','قوة كلمة المرور: مقبولة':'Password strength: fair','قوة كلمة المرور: جيدة':'Password strength: good','قوة كلمة المرور: قوية':'Password strength: strong',
+ 'الاسم':'Name','الكود':'Code','الدور':'Role','المدرسة':'School','السنة الدراسية':'Grade','الفصل':'Class','طالب':'Student','مدرس':'Teacher',
+ 'كلمة المرور محفوظة مشفّرة ولا تُعرض لأي حد. لو نسيتها اطلب من مدير المدرسة كلمة جديدة.':'Your password is stored encrypted and is never shown to anyone. If you forget it, ask the school admin for a new one.',
+ 'المظهر':'Appearance','الوضع':'Mode','حجم الخط':'Font size','تلقائي':'Auto','نهاري':'Light','ليلي':'Dark','عادي':'Normal','كبير':'Large','كبير جداً':'Extra large',
+ 'التطبيق والإشعارات':'App & notifications','تثبيت التطبيق':'Install the app','للتثبيت: من قائمة Chrome اختر «تثبيت التطبيق».':'To install: from the Chrome menu choose “Install app”.','التنبيهات مفعّلة':'Alerts enabled','التنبيهات مقفولة من إعدادات المتصفح.':'Alerts are blocked in the browser settings.','التنبيهات غير مدعومة في هذا المتصفح.':'Alerts are not supported in this browser.',
+ 'التنبيهات اللحظية غير مدعومة في هذا المتصفح (جرّب Chrome على التابلت بعد تثبيت التطبيق).':'Instant alerts are not supported in this browser (try Chrome on the tablet after installing the app).','التنبيهات اللحظية مفعّلة':'Instant alerts enabled','إيقاف':'Turn off','تفعيل التنبيهات اللحظية':'Enable instant alerts','جارٍ التفعيل…':'Enabling…',
+ 'اتفعّلت تنبيهات الجهاز.':'Device alerts enabled.','اتقفلت تنبيهات الجهاز.':'Device alerts turned off.',
+ 'الاتصال':'Connection','في خطأ في بياناتي؟':'Is there a mistake in my details?','اكتب الخطأ وهيوصل لمدير المدرسة يصلّحه.':'Describe the mistake and it will reach the school admin to fix it.','وصف الخطأ':'Describe the mistake','إرسال البلاغ':'Send report','وصل بلاغك لمدير المدرسة.':'Your report reached the school admin.',
+ 'مثال: اسمي مكتوب غلط، أو سنتي/فصلي غلط':'e.g. my name is misspelled, or my grade/class is wrong',
+ 'تغيير الاسم':'Change name','الاسم الجديد بيتغيّر بعد موافقة مدير المدرسة.':'The new name takes effect after the school admin approves.','الاسم الجديد':'New name','اكتب الاسم كاملاً':'Write the full name','وصل طلبك لمدير المدرسة.':'Your request reached the school admin.',
+ 'المساعدة':'Help','جولة تعريفية':'Quick tour','إشعار الخصوصية':'Privacy notice','عن التطبيق':'About the app','تسجيل الخروج':'Log out','اللغة':'Language','العربية':'العربية',
+ 'رقم النسخة':'Version','تاريخ النسخة':'Version date','الحالة':'Status','إغلاق':'Close','تطبيق للتقييمات والأداءات الصفية والمنزلية لطلاب المرحلة الثانوية.':'An app for weekly assessments and class and home performances for secondary-school students.',
+ 'قبل ما تبدأ، اقرأ الآتي:':'Before you start, please read:','قرأت الإشعار وأوافق':'I have read the notice and agree','متابعة':'Continue','خروج':'Exit',
+ 'نجمع اسمك وكودك وسنتك الدراسية وفصلك ومدرستك، وإجاباتك ودرجاتك داخل التطبيق فقط.':'We collect your name, code, grade, class, school, and your answers and scores inside the app only.',
+ 'نستخدم البيانات لتشغيل التقييمات والأداءات وعرض النتائج لك ولمدرسيك ولمدير مدرستك.':'We use the data to run assessments and performances and to show results to you, your teachers and your school admin.',
+ 'لا نبيع بياناتك ولا نشاركها مع أي جهة خارج المنظومة التعليمية.':'We do not sell your data or share it with anyone outside the education system.',
+ 'كلمة المرور محفوظة مشفّرة ولا يراها أي شخص، حتى مدير المدرسة.':'Your password is stored encrypted and nobody can see it, not even the school admin.',
+ 'تُحفظ إجاباتك مؤقتاً على جهازك لتعمل بدون إنترنت، وتُرفع عند توفر الاتصال.':'Your answers are saved temporarily on your device so it works offline, and are uploaded when a connection is available.',
+ 'تنبيهات الجهاز اختيارية، ولا تحتوي على أسماء أو درجات.':'Device alerts are optional and contain no names or scores.',
+ 'في نهاية السنة الدراسية تُحذف سجلات الطلاب حسب قرار المدرسة.':'At the end of the school year, student records are deleted according to the school’s decision.',
+ 'تقدر تطلب تصحيح بياناتك من مدير المدرسة في أي وقت من صفحة «حسابي».':'You can ask the school admin to correct your details at any time from “My account”.',
+ 'جولة سريعة':'Quick tour','السابق':'Previous','التالي':'Next','تخطي':'Skip','ابدأ الاستخدام':'Start using the app',
+ 'المواد والتقييمات':'Subjects and assessments','من الصفحة الرئيسية اختر المادة، وبعدها تقييمات أو أداءات صفية أو أداءات منزلية. الأسبوع بيتفتح لما المدرس يفتحه (والمنزلي بيفتح لوحده في أسبوعه).':'From the home page choose a subject, then assessments, class performances or home performances. A week opens when the teacher opens it (home performances open by themselves in their week).',
+ 'وقت الامتحان':'Exam time','إجاباتك بتتحفظ على جهازك حتى لو النت فصل، وبترفع تلقائياً لما يرجع. اضغط «تسليم» في الآخر.':'Your answers are saved on your device even if the internet drops, and upload automatically when it returns. Press “Submit” at the end.',
+ 'درجاتك وأخطاؤك':'Your scores and mistakes','من «درجاتي» تشوف نتايجك، ومن «أخطائي» تراجع أسئلتك الغلط. والإشعارات بتعرفك بأي جديد.':'From “My grades” you see your results, and from “My mistakes” you review the questions you got wrong. Notifications tell you about anything new.',
+ 'بدون نت':'Offline','جارٍ المزامنة':'Syncing','بيانات محفوظة (قد لا تكون محدّثة)':'Saved data (may not be up to date)','متصل':'Online','○ بدون نت':'○ Offline','⟳ جارٍ المزامنة':'⟳ Syncing','● بيانات محفوظة (قد لا تكون محدّثة)':'● Saved data (may not be up to date)','● متصل':'● Online',
+ 'تعذّر الحفظ على التابلت لأن المساحة ممتلئة. احذف ملفات أو تطبيقات لتفريغ مساحة، وإلا قد تضيع إجاباتك.':'Could not save on the tablet because storage is full. Delete files or apps to free space, or your answers may be lost.','مساحة التخزين على التابلت قليلة. فرّغ بعض المساحة.':'Tablet storage is low. Please free some space.',
+ 'جارٍ التحميل…':'Loading…','تعذّر تحميل الصفحة':'Could not load the page','اتأكد من النت وجرّب تاني.':'Check your internet and try again.','إعادة المحاولة':'Try again','تراجع':'Undo',
+ 'شعار تقييمي':'Taqeemy logo','مخفية':'Hidden','الأول الثانوي':'First Year Secondary','الثاني الثانوي':'Second Year Secondary','الثالث الثانوي':'Third Year Secondary','الصف الأول الثانوي':'First Year Secondary','تصلك إشعارات عند فتح المدرس تقييماً أو أداءً لفصلك، وعند فتح نموذج الإجابة، وعند تصحيح درجتك.':'You get notifications when the teacher opens an assessment or performance for your class, when the answer model is opened, and when your score is graded.',
+ 'صورة':'Image','أيقونة المادة':'Subject icon','سؤال':'question','أسئلة':'questions','صفر':'zero','تعذّر الاتصال':'Connection failed'
+};
+var ENP=[
+ [/^(تقييم أسبوعي|أداء صفي|أداء منزلي) · الأسبوع (\d+)$/,function(m){return EN[m[1]]+' · Week '+m[2]}],
+ [/^الأسبوع (\d+)$/,'Week $1'],
+ [/^أهلاً يا (.+)$/,'Hello, $1'],[/^أهلاً (.+)$/,'Welcome, $1'],
+ [/^أ\. (.+)$/,'Teacher: $1'],
+ [/^مطلوب الآن: (\d+)$/,'Due now: $1'],
+ [/^وفيه (\d+) كمان مفتوح$/,'$1 more open'],
+ [/^(.+) مفتوح الآن$/,'$1 open now'],
+ [/^بانتظار رفع (\d+)$/,'Waiting to upload $1'],
+ [/^لم ينزل بعد · ينزل (.+)$/,'Not released yet · releases $1'],
+ [/^مفتوح · آخر موعد (.+)$/,'Open · due $1'],[/^آخر موعد (.+)$/,'Due $1'],
+ [/^أجبت على (\d+) من (\d+)$/,'Answered $1 of $2'],
+ [/^([\d.]+) من ([\d.]+)$/,'$1 of $2'],
+ [/^درجتك: ([\d.]+) من ([\d.]+)$/,'Your score: $1 of $2'],
+ [/^\(([\d.]+) درجة\)$/,'($1 points)'],
+ [/^السؤال (\d+)$/,'Question $1'],
+ [/^عندك (\d+) (?:سؤال|أسئلة) من غير إجابة\.$/,'You have $1 unanswered question(s).'],
+ [/^وعلّمت (\d+) للمراجعة\.$/,'$1 flagged for review.'],
+ [/^(?:عندك (\d+) (?:سؤال|أسئلة) من غير إجابة\. )?(?:وعلّمت (\d+) للمراجعة\. )?متأكد من التسليم؟ لا يمكن التعديل بعده\.$/,function(m){return (m[1]?'You have '+m[1]+' unanswered question(s). ':'')+(m[2]?m[2]+' flagged for review. ':'')+'Sure you want to submit? You cannot edit afterwards.'}],
+ [/^آخر مزامنة: (.+)$/,'Last sync: $1'],
+ [/^وافقت على إشعار الخصوصية بتاريخ (.+)$/,'You accepted the privacy notice on $1'],
+ [/^وافقت عليه بتاريخ (.+)$/,'Accepted on $1'],
+ [/^مستني موافقة مدير المدرسة\.$/,'Waiting for the school admin’s approval.'],
+ [/^طلبك لتغيير الاسم إلى «(.+)» مستني موافقة مدير المدرسة\.$/,'Your request to change your name to “$1” is waiting for the school admin’s approval.'],
+ [/^آخر طلب لتغيير الاسم لم يُقبل\.$/,'The last name-change request was not accepted.'],
+ [/^جولة سريعة · (\d+) من (\d+)$/,'Quick tour · $1 of $2'],
+ [/^اخترت (\d+) من (\d+) إجابات صحيحة، و(\d+) (?:اختياراً خطأ|اختيارات خطأ)$/,'You chose $1 of $2 correct answers, and $3 wrong choice(s)'],
+ [/^الملخص: (.+)$/,function(m){return 'Summary: '+trStr(m[1])}],
+ [/^(\d+)٪$/,'$1%'],[/^(\d+) طالب · (\d+) مدرس · (\d+) فصل$/,'$1 students · $2 teachers · $3 classes'],
+ [/^فتح المدرس (.+)$/,function(m){return 'The teacher opened '+tokTr(m[1])}],
+ [/^فُتحت الإجابات الصحيحة: (.+)$/,function(m){return 'Correct answers opened: '+tokTr(m[1])}],
+ [/^(?:تم تصحيح سؤال في|عدّل المدرس درجتك في) (.+)$/,function(m){return (/^تم/.test(m.input)?'A question was graded in ':'The teacher edited your score in ')+tokTr(m[1])}],
+ [/^لك لمدة/,'']
+];
+var ENT=[['تقييم أسبوعي','Weekly assessment'],['أداء صفي','Class performance'],['أداء منزلي','Home performance'],['الأسبوع','Week'],['لك لمدة','for you for'],[' لمدة ',' for '],['دقيقة','min'],['دقائق','min'],['كودك','Your code'],['درجة','points']];
+(function(){Object.keys(EN).forEach(function(k){var nk=k.replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)});if(nk!==k&&EN[nk]==null)EN[nk]=EN[k]})})();
+var SUBJEN={};
+function subjMap(){SUBJEN={};try{(REF.subjects||[]).forEach(function(s){if(s&&s.name_en)SUBJEN[s.name]=s.name_en})}catch(e){}}
+function tokTr(t){var r=t;ENT.forEach(function(p){r=r.split(p[0]).join(p[1])});for(var k in SUBJEN){if(r.indexOf(k)>-1)r=r.split(k).join(SUBJEN[k])}return r}
+var _idx='٠١٢٣٤٥٦٧٨٩';
+function trStr(s){var t=String(s).trim();if(!t||!/[؀-ۿ]/.test(t))return s;
+  var nm=t.replace(/[٠-٩]/g,function(d){return _idx.indexOf(d)}).replace(/٫/g,'.'),r=EN[nm];
+  if(r==null&&SUBJEN[nm]!=null)r=SUBJEN[nm];
+  if(r==null){for(var i=0;i<ENP.length;i++){var m=ENP[i][0].exec(nm);if(m){r=typeof ENP[i][1]==='function'?ENP[i][1](m):nm.replace(ENP[i][0],ENP[i][1]);break}}}
+  if(r==null){var x=tokTr(nm);if(x!==nm)r=x}
+  return r==null?s:String(s).replace(t,r)}
+function T(s){return EL==='en'?trStr(s):s}
+var TR_SKIP=/^(SCRIPT|STYLE|TEXTAREA|INPUT|SVG|svg)$/;
+function trDom(root){if(!root||EL!=='en')return;
+  var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),nodes=[],nd;
+  while((nd=w.nextNode()))nodes.push(nd);
+  nodes.forEach(function(x){var p=x.parentNode;if(!p||TR_SKIP.test(p.nodeName)||(p.closest&&p.closest('[data-notr]')))return;
+    var inQ=p.closest&&p.closest('.q,.model');var v=x.nodeValue;if(!/[؀-ۿ]/.test(v))return;
+    var out=inQ?trExact(v):trStr(v);if(out!==v)x.nodeValue=out});
+  root.querySelectorAll('[placeholder],[aria-label],[title],[alt]').forEach(function(el){['placeholder','aria-label','title','alt'].forEach(function(a){var v=el.getAttribute(a);if(v&&/[؀-ۿ]/.test(v)){var o=trStr(v);if(o!==v)el.setAttribute(a,o)}})})}
+function trExact(s){var t=String(s).trim(),nm=t.replace(/[٠-٩]/g,function(d){return _idx.indexOf(d)}).replace(/٫/g,'.'),r=EN[nm];if(r==null){for(var i=0;i<ENP.length;i++){var m=ENP[i][0].exec(nm);if(m){r=typeof ENP[i][1]==='function'?ENP[i][1](m):nm.replace(ENP[i][0],ENP[i][1]);break}}}return r==null?s:String(s).replace(t,r)}
+/* اللغة المطلوبة: الحساب ثم الجهاز ثم الافتراضي (طالب مدرسة لغات = English). المدرس/المدير/الوزارة عربي فقط الآن */
+function wantLang(){var l=null;if(P&&P.lang)l=P.lang;if(!l){var ls=lsGet('trial-lang');if(ls==='ar'||ls==='en')l=ls}
+  if(!l&&P&&P.role==='student'&&P.school_kind==='languages')l='en';return l||'ar'}
+function applyLang(){EL=(wantLang()==='en'&&(!P||P.role==='student'))?'en':'ar';var d=document.documentElement;d.lang=EL;d.dir=EL==='en'?'ltr':'rtl';subjMap()}
+function setLang(l){lsSet('trial-lang',l);if(P){P.lang=l;try{rpc('set_lang',{p_lang:l}).catch(function(){})}catch(e){}}applyLang();draw()}
+H.lang=function(ds){setLang(ds&&ds.t?ds.t:(EL==='en'?'ar':'en'))};
+function langBtn(){return '<button type="button" class="btn sec sm" data-act="lang" aria-label="'+(EL==='en'?'تغيير اللغة إلى العربية':'Change language to English')+'" lang="'+(EL==='en'?'ar':'en')+'" data-notr="1">'+(EL==='en'?'العربية':'English')+'</button>'}
+function langCard(){if(!P||P.role!=='student')return '';return '<div class="card"><h3>'+(EL==='en'?'Language':'اللغة')+'</h3>'+seg([['ar','العربية'],['en','English']],EL,'lang')+'</div>'}
+
 var VIEWS={profile:vProfile,tToday:vTToday,tPreview:vTPreview,login:vLogin,sHome:vSHome,sSubject:vSSubject,sExam:vSExam,sResult:vSResult,sMistakes:vSMistakes,sGrades:vSGrades,notes:vNotes,tHome:vTHome,tClass:vTClass,tGrading:vTGrading,tResults:vTResults,mList:vMList,mEdit:vMEdit,gSch:vGSch,gEd:vGEd,gSub:vGSub,aOver:vAOver,aStu:vAStu,aTea:vATea,aCls:vACls,aYear:vAYear,gDash:vGDash};
 function draw(){
-  var h;
+  var h;applyLang();
   if(MODALF){if(MODAL===MODALL){MODAL=MODALL=MODALF()}else MODALF=null}
   if(!SES&&R.v!=='login')R={v:'login',f:R.f||{}};
   try{
@@ -942,7 +1078,8 @@ function draw(){
   }catch(e){h='<div class="msg bad">حدث خطأ في عرض الصفحة: '+esc(e.message)+'</div>'}
   document.getElementById('app').innerHTML=h;
   if(R.v==='sExam')updExam();
-  document.getElementById('modal').innerHTML=MODAL?'<div class="ov" data-act="closeModal"><div class="dlg" role="dialog" aria-modal="true" data-stop="1">'+MODAL+'</div></div>':''}
+  document.getElementById('modal').innerHTML=MODAL?'<div class="ov" data-act="closeModal"><div class="dlg" role="dialog" aria-modal="true" data-stop="1">'+MODAL+'</div></div>':'';
+  if(EL==='en'){trDom(document.getElementById('app'));trDom(document.getElementById('modal'))}}
 
 /* ---------- التحميل لكل شاشة ---------- */
 var LOAD={
@@ -1275,15 +1412,30 @@ H.mPub=async function(ds){
 /* ---------- إدارة الوزارة: المدارس والمحررون والمواد ---------- */
 async function refreshMg(){C.mg=await rpc('m_overview')}
 function pwRow(){var g=R.gc;return '<div class="row" style="gap:6px;flex-wrap:nowrap"><input class="inp" data-bind="rpw" dir="ltr" autocomplete="off" placeholder="كلمة المرور الجديدة" value="'+esc(R.f.rpw||'')+'" style="min-width:150px">'+btn('اقترح','suggest',{k:'rpw'},'sec sm')+btn('حفظ','gDo','','sm')+btn('إلغاء','gNo','','sec sm')+'</div><span class="hint">اتركها فاضية لتتولد تلقائياً (٦ أحرف على الأقل)</span>'}
+var TRK={both:'مشتركة',arabic:'مدارس عربي',languages:'مدارس لغات'},KINDN={arabic:'عربي',languages:'لغات'};
+function trkBadge(x){return bdg(TRK[x.track||'both'],x.track==='languages'?'ok':'')}
+function pickRow(map,cur,act,lbl){return '<div class="tabs" role="group" aria-label="'+lbl+'">'+Object.keys(map).map(function(k){return '<button type="button" class="tab'+(cur===k?' on':'')+'" data-act="'+act+'" data-v="'+k+'" aria-pressed="'+(cur===k?'true':'false')+'">'+map[k]+'</button>'}).join('')+'</div>'}
+H.skindPick=function(ds){R.f.skind=ds.v;draw()};H.eskPick=function(ds){R.f.esk=ds.v;draw()};H.subtrPick=function(ds){R.f.subtr=ds.v;draw()};H.sntrPick=function(ds){R.f.sntr=ds.v;draw()};
+function schEditHtml(s){var c=R.gc;return '<div class="card" style="margin:0">'+fld('اسم المدرسة','esn')+'<b>نوع المدرسة</b>'+pickRow(KINDN,R.f.esk||s.kind||'arabic','eskPick','نوع المدرسة')+(c.cf?'<div class="msg warn">تغيير النوع هيشيل تعيين '+n(c.cf)+' مادة/مدرس من فصول المدرسة لأنها مش من مسار النوع الجديد (باقي البيانات بتفضل). اضغط «تأكيد وحفظ» لو متأكد.</div>':'')+'<div class="row">'+btn(c.cf?'تأكيد وحفظ':'حفظ','schSave','','sm')+btn('إلغاء','gNo','','sec sm')+'</div></div>'}
+H.schEdit=function(ds){var s=C.mg.schools.filter(function(x){return x.id==+ds.sid})[0]||{};R.gc={k:'es',sid:+ds.sid};R.f.esn=s.name||'';R.f.esk=s.kind||'arabic';R.f.err='';R.f.ok='';draw()};
+H.schSave=async function(){var c=R.gc,f=R.f;if(!c)return;f.err='';f.ok='';
+  try{await rpc('m_set_school',{p_id:c.sid,p_name:f.esn||null,p_kind:f.esk||null,p_force:!!c.force});R.gc=null;await refreshMg();f.ok='اتحفظت بيانات المدرسة.'}
+  catch(e){var m=/CONFLICT:(\d+)/.exec((e&&e.message)||'');if(m){c.cf=+m[1];c.force=true}else f.err=emsg(e)}
+  draw()};
+function subEditRow(s){return '<tr><td colspan="3"><div class="card" style="margin:0">'+fld('اسم المادة (بالعربي)','sen')+fld('اسم المادة بالإنجليزي','sne',{dir:'ltr'})+'<b>الاستخدام</b>'+pickRow(TRK,R.f.sntr||s.track||'both','sntrPick','مسار المادة')+'<div class="row">'+btn('حفظ','subSave','','sm')+btn('إلغاء','subNo','','sec sm')+'</div></div></td></tr>'}
+H.subEdit=function(ds){var s=C.mg.subjects.filter(function(x){return x.id==+ds.s})[0]||{};R.sm=+ds.s;R.ip=null;R.f.sen=s.name||'';R.f.sne=s.name_en||'';R.f.sntr=s.track||'both';R.f.err='';R.f.ok='';draw()};
+H.subNo=function(){R.sm=null;draw()};
+H.subSave=async function(){var f=R.f;f.err='';f.ok='';try{await rpc('m_set_subject_meta',{p_id:R.sm,p_name:f.sen||null,p_name_en:f.sne||null,p_track:f.sntr||null});R.sm=null;await refreshMg();rcClear('ref_data');REF=await rpc('ref_data');f.ok='اتحفظت بيانات المادة.'}catch(e){f.err=emsg(e)}draw()};
 function vGSch(){
   var g=C.mg,f=R.f,c=R.gc;
-  var form='<div class="card"><h3 class="hd">'+HI('home')+'إضافة مدرسة</h3>'+fld('اسم المدرسة','sname')+'<div class="row" style="align-items:flex-end">'+fld('كود المدرسة (أرقام من ٣ إلى ٨)','scode',{dir:'ltr'})+fld('كلمة مرور مدير المدرسة','spw',{dir:'ltr'})+btn('اقترح','suggest',{k:'spw'},'sec sm')+'</div><span class="hint">يُنشأ لمدير المدرسة حساب بكود admin-كود المدرسة (مثال: admin-10452). كلمة المرور تُكتب هنا وتظهر في الورقة المطبوعة.</span>'+btn(R.busy?'جارٍ الإنشاء…':'إنشاء المدرسة','addSch','','',R.busy)+'</div>';
+  var form='<div class="card"><h3 class="hd">'+HI('home')+'إضافة مدرسة</h3>'+fld('اسم المدرسة','sname')+'<b>نوع المدرسة</b>'+pickRow(KINDN,R.f.skind||'arabic','skindPick','نوع المدرسة')+'<div class="row" style="align-items:flex-end">'+fld('كود المدرسة (أرقام من ٣ إلى ٨)','scode',{dir:'ltr'})+fld('كلمة مرور مدير المدرسة','spw',{dir:'ltr'})+btn('اقترح','suggest',{k:'spw'},'sec sm')+'</div><span class="hint">يُنشأ لمدير المدرسة حساب بكود admin-كود المدرسة (مثال: admin-10452). كلمة المرور تُكتب هنا وتظهر في الورقة المطبوعة.</span>'+btn(R.busy?'جارٍ الإنشاء…':'إنشاء المدرسة','addSch','','',R.busy)+'</div>';
   var rows=g.schools.map(function(s){
     var act;
     if(c&&c.k==='rs'&&c.id===s.admin_id)act=pwRow();
     else if(c&&c.k==='ds'&&c.sid===s.id)act='<div class="msg bad">سيُحذف نهائياً: كل حسابات المدرسة وفصولها ودرجاتها. اكتب كود المدرسة <b dir="ltr">'+esc(s.code)+'</b> للتأكيد.</div><div class="row" style="gap:6px"><input class="inp" data-bind="dcode" dir="ltr" autocomplete="off" value="'+esc(f.dcode||'')+'" style="min-width:120px">'+btn(R.busy?'جارٍ الحذف…':'احذف نهائياً','gDo','','sm',R.busy)+btn('إلغاء','gNo','','sec sm',R.busy)+'</div>';
-    else act=(s.admin_id?btn('كلمة مرور جديدة للمدير','gAsk',{k:'rs',id:s.admin_id,code:s.admin_code,name:'مدير مدرسة '+s.name},'sec sm')+' ':'')+btn('حذف المدرسة','gAsk',{k:'ds',sid:s.id,code:s.code},'sec sm');
-    return '<tr><td>'+esc(s.name)+'</td><td dir="ltr" style="text-align:right">'+esc(s.code)+'</td><td dir="ltr" style="text-align:right">'+esc(s.admin_code||'—')+'</td><td>'+n(s.students)+' طالب · '+n(s.teachers)+' مدرس · '+n(s.classes)+' فصل</td><td>'+act+'</td></tr>'}).join('');
+    else if(c&&c.k==='es'&&c.sid===s.id)act=schEditHtml(s);
+    else act=btn('تعديل','schEdit',{sid:s.id},'sec sm')+' '+(s.admin_id?btn('كلمة مرور جديدة للمدير','gAsk',{k:'rs',id:s.admin_id,code:s.admin_code,name:'مدير مدرسة '+s.name},'sec sm')+' ':'')+btn('حذف المدرسة','gAsk',{k:'ds',sid:s.id,code:s.code},'sec sm');
+    return '<tr><td>'+esc(s.name)+' '+bdg(KINDN[s.kind||'arabic'],s.kind==='languages'?'ok':'')+'</td><td dir="ltr" style="text-align:right">'+esc(s.code)+'</td><td dir="ltr" style="text-align:right">'+esc(s.admin_code||'—')+'</td><td>'+n(s.students)+' طالب · '+n(s.teachers)+' مدرس · '+n(s.classes)+' فصل</td><td>'+act+'</td></tr>'}).join('');
   return '<h1 class="hd">'+HI('home')+'المدارس</h1>'+okm()+err()+form+'<div class="card"><h3 class="hd">'+HI('home')+'كل المدارس ('+n(g.schools.length)+')</h3><div class="tbl"><table><thead><tr><th>المدرسة</th><th>الكود</th><th>دخول المدير</th><th>الأعداد</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="5">لا توجد مدارس.</td></tr>')+'</tbody></table></div></div>'}
 function vGEd(){
   var g=C.mg,c=R.gc;
@@ -1308,8 +1460,8 @@ H.saveTerm=async function(){var f=R.f;f.err='';f.ok='';try{await rpc('m_set_term
 H.clearTerm=async function(){var f=R.f;f.err='';f.ok='';try{await rpc('m_set_term',{p_date:null});f.term='';f.ok='تم مسح التاريخ.';await reload()}catch(e){f.err=emsg(e);draw()}};
 function vGSub(){
   var g=C.mg,c=R.gc;
-  var form='<div class="card"><h3 class="hd">'+HI('book')+'إضافة مادة</h3>'+fld('اسم المادة','subn')+'<b>اختر أيقونة المادة</b>'+icoGrid(R.f.sico||'','sicoPick')+'<div class="row">'+btn('إضافة','addSub')+'<span class="hint">الأيقونة بتظهر للطالب والمدرس.</span></div></div>';
-  var rows=g.subjects.map(function(s){var cur=(REF.subjects.filter(function(x){return x.id==s.id})[0]||{}).icon||'',gb=[1,2,3].map(function(k){var on=gsHas(k,s.id);return '<button type="button" class="tab'+(on?' on':'')+'" data-act="sgTog" data-s="'+s.id+'" data-g="'+k+'" aria-pressed="'+(on?'true':'false')+'">'+GN[k]+'</button>'}).join('');return '<tr><td><button type="button" class="ic c'+(s.id%6)+' icbtn" data-act="icoRow" data-s="'+s.id+'" aria-label="تغيير أيقونة '+esc(s.name)+'" title="تغيير الأيقونة">'+subjIcon(s.name,s.id)+'</button> '+esc(s.name)+'</td><td><div class="tabs" role="group" aria-label="سنوات '+esc(s.name)+'">'+gb+'</div>'+((REF.gs||[]).some(function(y){return y.s==s.id})?'':'<div class="sub">لم تُحدَّد لها سنة: لن تظهر للمدارس.</div>')+'</td><td>'+(c&&c.k==='dsub'&&+c.id===s.id?'<span class="sub">ستختفي من كل المدارس (بياناتها القديمة تبقى محفوظة). متأكد؟</span> '+btn('نعم، احذف','gDo','','sm')+' '+btn('إلغاء','gNo','','sec sm'):btn('حذف','gAsk',{k:'dsub',id:s.id},'sec sm'))+'</td></tr>'+(R.ip===s.id?'<tr><td colspan="3"><b class="sub">اختر أيقونة «'+esc(s.name)+'»</b>'+icoGrid(cur,'icoSet',s.id)+'</td></tr>':'')}).join('');
+  var form='<div class="card"><h3 class="hd">'+HI('book')+'إضافة مادة</h3>'+fld('اسم المادة (بالعربي)','subn')+fld('اسم المادة بالإنجليزي','subne',{dir:'ltr'})+'<b>الاستخدام</b>'+pickRow(TRK,R.f.subtr||'both','subtrPick','مسار المادة')+'<b>اختر أيقونة المادة</b>'+icoGrid(R.f.sico||'','sicoPick')+'<div class="row">'+btn('إضافة','addSub')+'<span class="hint">الأيقونة بتظهر للطالب والمدرس.</span></div></div>';
+  var rows=g.subjects.map(function(s){var cur=(REF.subjects.filter(function(x){return x.id==s.id})[0]||{}).icon||'',gb=[1,2,3].map(function(k){var on=gsHas(k,s.id);return '<button type="button" class="tab'+(on?' on':'')+'" data-act="sgTog" data-s="'+s.id+'" data-g="'+k+'" aria-pressed="'+(on?'true':'false')+'">'+GN[k]+'</button>'}).join('');return '<tr><td><button type="button" class="ic c'+(s.id%6)+' icbtn" data-act="icoRow" data-s="'+s.id+'" aria-label="تغيير أيقونة '+esc(s.name)+'" title="تغيير الأيقونة">'+subjIcon(s.name,s.id)+'</button> '+esc(s.name)+' '+trkBadge(s)+(s.name_en&&s.name_en!==s.name?'<div class="sub" dir="ltr" style="text-align:right">'+esc(s.name_en)+'</div>':'')+'</td><td><div class="tabs" role="group" aria-label="سنوات '+esc(s.name)+'">'+gb+'</div>'+((REF.gs||[]).some(function(y){return y.s==s.id})?'':'<div class="sub">لم تُحدَّد لها سنة: لن تظهر للمدارس.</div>')+'</td><td>'+(c&&c.k==='dsub'&&+c.id===s.id?'<span class="sub">ستختفي من كل المدارس (بياناتها القديمة تبقى محفوظة). متأكد؟</span> '+btn('نعم، احذف','gDo','','sm')+' '+btn('إلغاء','gNo','','sec sm'):btn('تعديل','subEdit',{s:s.id},'sec sm')+' '+btn('حذف','gAsk',{k:'dsub',id:s.id},'sec sm'))+'</td></tr>'+(R.sm===s.id?subEditRow(s):'')+(R.ip===s.id?'<tr><td colspan="3"><b class="sub">اختر أيقونة «'+esc(s.name)+'»</b>'+icoGrid(cur,'icoSet',s.id)+'</td></tr>':'')}).join('');
   return '<h1 class="hd">'+HI('book')+'المواد</h1>'+okm()+err()+form+'<div class="card"><h3 class="hd">'+HI('book')+'المواد ('+n(g.subjects.length)+')</h3><div class="tbl"><table><thead><tr><th>المادة</th><th>السنوات الدراسية</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="3">لا توجد مواد.</td></tr>')+'</tbody></table></div></div>'}
 H.gAsk=function(ds){R.gc={k:ds.k,id:ds.id,sid:ds.sid?+ds.sid:undefined,code:ds.code,name:ds.name};R.f.rpw='';R.f.dcode='';R.f.err='';R.f.ok='';draw()};
 H.sicoPick=function(ds){R.f.sico=R.f.sico===ds.i?'':ds.i;draw()};
@@ -1334,7 +1486,9 @@ H.addSch=async function(){
   if(!String(f.sname||'').trim()||!String(f.scode||'').trim()){f.err='اكتب اسم المدرسة وكودها.';return draw()}
   R.busy=true;draw();
   try{var r=await fnCall({action:'create_school',name:f.sname,code:String(f.scode).trim(),password:f.spw||undefined});
-    await refreshMg();MODAL=credHtml([{name:r.name,code:r.code,password:r.password}],'بيانات دخول مدير المدرسة');f.sname='';f.scode='';f.spw='';f.ok='تم إنشاء المدرسة.'}
+    await refreshMg();
+    if(f.skind==='languages'){var ns=C.mg.schools.filter(function(x){return String(x.code)===String(r.code)})[0];if(ns){await rpc('m_set_school',{p_id:ns.id,p_name:null,p_kind:'languages',p_force:false});await refreshMg()}}
+    f.skind='';MODAL=credHtml([{name:r.name,code:r.code,password:r.password}],'بيانات دخول مدير المدرسة');f.sname='';f.scode='';f.spw='';f.ok='تم إنشاء المدرسة.'}
   catch(e){f.err=emsg(e)}
   R.busy=false;draw()};
 H.addEd=async function(){
@@ -1350,7 +1504,7 @@ H.sgTog=async function(ds){var f=R.f,sid=+ds.s,g=+ds.g;f.err='';f.ok='';var cur=
   draw()};
 H.addSub=async function(){
   var f=R.f;f.err='';f.ok='';
-  try{await rpc('m_add_subject',{p_name:f.subn||'',p_icon:f.sico||null});await refreshMg();rcClear('ref_data');REF=await rpc('ref_data');f.subn='';f.sico='';f.ok='تمت إضافة المادة. اختر السنوات اللي بتاخدها من الجدول.'}
+  try{await rpc('m_add_subject',{p_name:f.subn||'',p_icon:f.sico||null,p_name_en:f.subne||null,p_track:f.subtr||'both'});await refreshMg();rcClear('ref_data');REF=await rpc('ref_data');f.subn='';f.subne='';f.subtr='';f.sico='';f.ok='تمت إضافة المادة. اختر السنوات اللي بتاخدها من الجدول.'}
   catch(e){f.err=emsg(e)}
   draw()};
 
@@ -1361,7 +1515,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('submit',function(e){var fm=e.target.closest('[data-submit]');if(!fm)return;e.preventDefault();H[fm.dataset.submit]()});
 function bind(e,ch){
   var el=e.target,ds=el.dataset;
-  if(ds.bind==='npw'){var pm=document.getElementById('pwm');if(pm){var sc=pwScore(el.value);pm.dataset.s=sc;pm.querySelector('.lb').textContent=sc?'قوة كلمة المرور: '+PW_LBL[sc]:''}}
+  if(ds.bind==='npw'){var pm=document.getElementById('pwm');if(pm){var sc=pwScore(el.value);pm.dataset.s=sc;pm.querySelector('.lb').textContent=sc?T('قوة كلمة المرور: '+PW_LBL[sc]):''}}
   if(ds.chg==='privok'){R.f.privok=el.checked;draw();return}
   if(ds.srch){R.f.q=el.value;var ps=el.selectionStart;draw();var e2=document.getElementById('f_q');if(e2){e2.focus();try{e2.setSelectionRange(ps,ps)}catch(x){}}return}
   if(ds.chg==='asg'){var ar0=R.asg.cls,id0=+ds.id,ii0=ar0.indexOf(id0);if(el.checked&&ii0<0)ar0.push(id0);if(!el.checked&&ii0>-1)ar0.splice(ii0,1);return}
